@@ -99,7 +99,7 @@ int main( int argc, char* argv[] )
 
 	// ToDo: Allocate Memory on host and device.
 	array_h = (float*) malloc(dimensionsX * dimensionsY * sizeof(float));
-	array_d = cudaMalloc(dimensionsX * dimensionsY * sizeof(float));
+	cudaMalloc((void**) &array_d, dimensionsX * dimensionsY * sizeof(float));
 
 	// Define the grid, block and thread dimensions. You can either mine, which is a rather simple one
 	// or change it like ever you want. You have to think about the indexing in the cuda kernel!
