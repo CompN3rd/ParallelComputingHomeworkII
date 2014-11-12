@@ -1,0 +1,12 @@
+#PBS -S /bin/bash
+#PBS -N cuda
+#PBS -o /home/y0054313/ParallelComputingHomeworkII/ex01/cuda.out
+#PBS -e /home/y0054313/ParallelComputingHomeworkII/ex01/cuda.err
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=00:01:00
+#PBS -l mem=4096mb
+
+#module add cuda-2.3
+#module add ompi-1.4.1-intel11
+
+/home/y0054313/ParallelComputingHomeworkII/ex01/julia.cuda

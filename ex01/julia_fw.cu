@@ -17,7 +17,7 @@ double get_time()
 // Function for writing the picture. Input: Array with with value[i] = 1
 // if part of the Julia-set, else 0. Size of the picture. 
 void writePPM(float* array_h, int dimX, int dimY) {
-	FILE *fp = fopen("picture.ppm", "wb");
+	FILE *fp = fopen("ParallelComputingHomeworkII/ex01/picture.ppm", "wb");
 	fprintf(fp, "P6\n%d %d\n255\n", dimX, dimY);
 	for (int j = 0; j < dimY; ++j)
 	{
@@ -97,16 +97,16 @@ int main( int argc, char* argv[] )
 
 	float *array_h, *array_d;
 
-	// ToDo: Allocate Memory on host and device.
-	array_h = (float*) malloc(dimensionsX * dimensionsY * sizeof(float));
-	cudaMalloc((void**) &array_d, dimensionsX * dimensionsY * sizeof(float));
+	// DONE: Allocate Memory on host and device.
+	array_h = (float*) malloc(dimensionX * dimensionY * sizeof(float));
+	cudaMalloc((void**) &array_d, dimensionX * dimensionY * sizeof(float));
 
 	// Define the grid, block and thread dimensions. You can either mine, which is a rather simple one
 	// or change it like ever you want. You have to think about the indexing in the cuda kernel!
-	dim3 dG(dimensionsX, dimensionsY);
+	dim3 dG(dimensionX, dimensionY);
 	dim3 dB(1);
 
-	// Call the kernel.
+	// DONE: Call the kernel.
 	julia<<<dG, dB>>>(array_d, dimensionX, dimensionY, iterations);
   
 	//Copy back the results.
