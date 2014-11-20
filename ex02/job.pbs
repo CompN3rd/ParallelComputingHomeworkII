@@ -1,0 +1,15 @@
+#PBS -S /bin/bash
+#PBS -N cuda
+#PBS -o cuda/cuda.out
+#PBS -e cuda/cuda.err
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=00:05:00
+#PBS -l mem=4096mb
+
+#module add cuda-2.3
+#module add cmpi-1.4.1-intell11
+
+export PATH=$PATH:/usr/local/cuda/bin
+export LD_LIBRARY_PATH=:/usr/local/cuda/lib64
+
+cuda/test.cuda
