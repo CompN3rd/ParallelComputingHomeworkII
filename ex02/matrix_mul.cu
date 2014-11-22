@@ -5,30 +5,50 @@
 #include "cuda_utils.h"
 
 
-// CUDA kernel
-/*__global__ void matrix_mul(float* matrixA_d, float* matrixb_d int dimX, int dimY)
+__global__ void MatrixMulKernel(float* Md, float* Nd, float* Pd, int Width)
 {
-
-
-}*/
- 
+	// Calculate the row index of the Pd element and M
+	int Row = blockIdx.y*TILE_WIDTH + threadIdx.y;
+	// Calculate the column index of Pd and N
+	int Col = blockIdx.x*TILE_WIDTH + threadIdx.x;
+	float Pvalue = 0;
+	// each thread computes one element of the block sub-matrix
+	for (int k = 0; k < Width; ++k)
+	{
+		Pvalue += Md[Row*Width+k] * Nd[k*Width+Col];
+	}
+	Pd[Row*Width+Col] = Pvalue;
+}
 
 int main( int argc, char* argv[] )
 {
 	Timer timer ;
+	double duration;	
 	
 	int ToDo = 1;
+	
+	float *matrixA_h, *matrixB_h, *matrixA_d, *matrixB_d, *matrix_erg, *matrix_erg_d;
+	
+
+	/ 1. Allocate and Load M, N to device memory
+	
+	cudaMemcpy(Md, M, size, cudaMemcpyHostToDevice);
+	cudaMemcpy(Nd, N, size, cudaMemcpyHostToDevice);
+	// Allocate P on the device
+	cudaMalloc(&Pd, size);
+	
 	int dimensionAx = 2;
 	int dimensionAy = 2;
 	int dimensionBy = 2;
 	int dimensionBx = 2;
-	double duration;
-	float *matrixA_h, *matrixB_h, *matrixA_d, *matrixB_d, *matrix_erg;
 	
-	matrixA_h  = (float*) malloc(dimensionAx * dimensionAy * sizeof(float));
-	matrixB_h  = (float*) malloc(dimensionBx * dimensionBy * sizeof(float));
+	int sizeA = dimensionAx * dimensionAy * sizeof(float);
+	int sizeB = dimensionBx * dimensionBy * sizeof(float);
+	
+	matrixA_h  = (float*) malloc(sizeA);
+	matrixB_h  = (float*) malloc(sizeB);
 	matrix_erg = (float*) malloc(dimensionAy * dimensionBx * sizeof(float)); 
-	
+		
 	int x,y;
 	/*
 	 Initialize A and B^T like:
@@ -75,7 +95,9 @@ int main( int argc, char* argv[] )
 		initTimer (& timer );
 		int row,column,columnB;
 		case 1: 
-			/*Matrix Multiplikation on CPU*/
+			/*********************************
+ 			 *	Matrix Multiplikation on CPU * 
+			 *********************************/
 			for(row=0; row<dimensionAy; row++)
 			{
 				for(column=0; column<dimensionBx; column++)
@@ -98,9 +120,30 @@ int main( int argc, char* argv[] )
 		break;
 		case 2: 
 			/* Matrix Multiplikation on GPU with device Mem*/
-			//TODO:
-
-		
+			/****************************************************
+ 			 *	Matrix Multiplikation on GPU without shared Mem * 
+			 ****************************************************/
+				cudaMalloc(&matrixA_d, sizeA);
+				cudaMalloc(&matrixB_d, sizeB);
+				cudaMalloc(&matrix_erg_d,dimensionAx*dimensionBy*sizeof(float));
+				cudaMemcpy(matrixA_d,matrixA_h,size, cudaMemcpyHostToDevice);
+				cudaMemcpy(matrixB_d,matrixB_h,size, cudaMemcpyHostToDevice);
+				
+				/* need: 
+				 *	maximal thread per block number
+				 *  maximal number of block which run at the same time
+				 *
+				*/
+				
+				// {dimensionX | dimensionX € N , dimensionX % 2 = 0} 
+				// {dimensionY | dimensionY € N , dimensionY % 2 = 0} 
+				
+				int dimG = 2;
+				int dimBX = (dimensionAx/dimG);
+				int dimBY = (dimensionBy/dimG);
+				dim3 gridDim(dimG,dimG),blockDim(dimBX,dimBY);
+				MatrixMulKernel<<<gridDim,blockDim>>>(matrixA_d,matrixB_d,matrix_erg_d,dimensionAx);
+				cudaMemcpy(matrix_erg, matrix_erg_d, cudaMemcpyDeviceToHost);
 		break;
 		case 3: 
 			/* Matrix Multiplikation on GPU with shared Mem*/
@@ -111,8 +154,12 @@ int main( int argc, char* argv[] )
 
 	}
 	
-	
-	
+	cudaFree(matrixA_d);
+	cudaFree(matrixB_d);
+	cudaFree(matrix_erg_d);
+	free(matrixA_h);
+	free(matrixB_h);
+	free(matrix_erg);
 	
 	return 0;
 }
