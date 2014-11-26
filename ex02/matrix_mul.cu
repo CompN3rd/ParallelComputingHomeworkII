@@ -4,38 +4,31 @@
 #include <sys/time.h>
 #include "cuda_utils.h"
 
-__constant__ int TILE_WIDTH;
+#define TILE_WIDTH 16
+#define WIDTH 1024
 
 // Shared Memory implementation
  __global__ void mat_mul(float *a, float *b, float *ab, int width)
 {
-	 //non square blocks not supported
-	 if (blockDim.x != blockDim.y)
-		 return;
-
-	// define tiles in accordance to blockDims
-	 int TX = blockDim.x;
-	 int TY = blockDim.y;
-
 	// shorthand
 	int tx = threadIdx.x, ty = threadIdx.y;
 	int bx = blockIdx.x, by = blockIdx.y;
 	// allocate tiles in __shared__ memory
-	__shared__ float s_a[TY][TX];
-	__shared__ float s_b[TY][TX];
+	__shared__ float s_a[TILE_WIDTH][TILE_WIDTH];
+	__shared__ float s_b[TILE_WIDTH][TILE_WIDTH];
 	// calculate the row & col index
 	int row = by*blockDim.y + ty;
 	int col = bx*blockDim.x + tx;
 	float result = 0;
 	// loop over the tiles of the input in phases
-	for(int p = 0; p < width/TX; ++p)
+	for(int p = 0; p < width/TILE_WIDTH; ++p)
 	{
 		// collaboratively load tiles into __shared__
-		s_a[ty][tx] = a[row*width + (p*TX + tx)];
-		s_b[ty][tx] = b[(p*TY + ty)*width + col];
+		s_a[ty][tx] = a[row*width + (p*TILE_WIDTH + tx)];
+		s_b[ty][tx] = b[(p*TILE_WIDTH + ty)*width + col];
 		__syncthreads();
 		// dot product between row of s_a and col of s_b
-		for(int k = 0; k < TX; ++k)
+		for(int k = 0; k < TILE_WIDTH; ++k)
 			result += s_a[ty][k] * s_b[k][tx];
 		__syncthreads();
 	}
@@ -65,18 +58,18 @@ int main( int argc, char* argv[] )
 	Timer timer ;
 	double duration;	
 	
-	int ToDo = 2;
-	
+    // Define memory pointers and dimensions
 	float *matrixA_h, *matrixB_h, *matrixA_d, *matrixB_d, *matrix_erg, *matrix_erg_d;
 		
-	int dimensionAx = 2;
-	int dimensionAy = 2;
-	int dimensionBy = 2;
-	int dimensionBx = 2;
+	int dimensionAx = WIDTH;
+	int dimensionAy = WIDTH;
+	int dimensionBy = WIDTH;
+	int dimensionBx = WIDTH;
 	
 	int sizeA = dimensionAx * dimensionAy * sizeof(float);
 	int sizeB = dimensionBx * dimensionBy * sizeof(float);
 	
+	//Allocate
 	matrixA_h  = (float*) malloc(sizeA);
 	matrixB_h  = (float*) malloc(sizeB);
 	matrix_erg = (float*) malloc(dimensionAy * dimensionBx * sizeof(float)); 
@@ -85,42 +78,34 @@ int main( int argc, char* argv[] )
 	cudaMalloc(&matrixB_d, sizeB);
 	cudaMalloc(&matrix_erg_d,dimensionAx*dimensionBy*sizeof(float));
 	
-	int dimG = 2;				
-	int dimBX = (dimensionAx/dimG);
-	int dimBY = (dimensionBy/dimG);
+	//Set cuda grid
+	int dimG = WIDTH / TILE_WIDTH;				
+	int dimB = TILE_WIDTH;
 
-	cudaMemcpyToSymbol(&TILE_WIDTH,&dimBX,sizeof(int),0,cudaMemcpyHostToDevice);
-	
 	dim3 gridDim(dimG, dimG);
-	dim3 blockDim(dimBX, dimBY);
+	dim3 blockDim(dimB, dimB);
 	
 	int x,y;
 	/*
 	 Initialize A and B like:
-	 |1    2    3....	|
-	 |w+1  w+2....	|
-	 |2w+2 2w+2...		|
-	 |.			|
-	 |.			|
+		random number per element
 	 A is stored row wise
 	 B is stored row wise 
 	 erg is stored row wise
 	*/
-	int counter = 0;
 	for(y=0; y<dimensionAy; y++)
 	{
 		for(x=0; x<dimensionAx; x++)
 		{
-			matrixA_h[x+(dimensionAx*y)] = ++counter;
+			matrixA_h[x+(dimensionAx*y)] = rand() % 100;
 		}
 	}
 
-	counter = 0;
 	for(x=0; x<dimensionBx; x++)
 	{
 		for(y=0; y<dimensionBy; y++)
 		{
-			matrixB_h[x+(dimensionBx*y)] = ++counter;
+			matrixB_h[x+(dimensionBx*y)] = rand() % 100;
 		}
 	}
 	/* // Print the Matrix
@@ -137,7 +122,7 @@ int main( int argc, char* argv[] )
 	
 	printf("\n nach dem initialisieren \n");
 	*/
-	for(ToDo = 1; ToDo <= 3; ToDo++)
+	for(int ToDo = 1; ToDo <= 3; ToDo++)
 	{
 		switch(ToDo)
 		{
@@ -162,10 +147,10 @@ int main( int argc, char* argv[] )
 				}
 				duration = getTimer(&timer);
 
-				for(x=0; x<dimensionAy*dimensionBy; x++)
+				/*for(x=0; x<dimensionAy*dimensionBy; x++)
 				{
 					printf("\n erg[%d] %f ", x, matrix_erg[x]);
-				}
+				}*/
 				printf("\n duration: %f", duration);
 			break;
 			case 2: 
@@ -192,10 +177,10 @@ int main( int argc, char* argv[] )
 					cudaThreadSynchronize();
 					duration = getTimer(&timer);
 
-					for(x=0; x<dimensionAy*dimensionBy; x++)
+					/*for(x=0; x<dimensionAy*dimensionBy; x++)
 					{
 						printf("\n erg[%d] %f ", x, matrix_erg[x]);
-					}
+					}*/
 					printf("\n duration: %f", duration);
 			break;
 
@@ -211,10 +196,10 @@ int main( int argc, char* argv[] )
 				cudaThreadSynchronize();
 
 				duration = getTimer(&timer);
-				for(x=0; x<dimensionAy*dimensionBy; x++)
+				/*for(x=0; x<dimensionAy*dimensionBy; x++)
 				{
 					printf("\n erg[%d] %f ", x, matrix_erg[x]);
-				}
+				}*/
 				printf("\n duration: %f", duration);
 
 			break;
