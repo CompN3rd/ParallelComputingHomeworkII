@@ -118,7 +118,7 @@ int main( int argc, char* argv[] )
 			{
 				printf("\n erg[%d] %f ", x, matrix_erg[x]);
 			}
-//			cudaThreadSyncronize(); // identifier undefined ???
+			cudaThreadSynchronize(); 
 			duration = getTimer(&timer);
 		break;
 		case 2: 
@@ -126,7 +126,6 @@ int main( int argc, char* argv[] )
 			/****************************************************
  			 *	Matrix Multiplikation on GPU without shared Mem * 
 			 ****************************************************/
-			 // ToDo: solution for non squared matrix
 			 // 
 				cudaMalloc(&matrixA_d, sizeA);
 				cudaMalloc(&matrixB_d, sizeB);
@@ -151,7 +150,7 @@ int main( int argc, char* argv[] )
 				}
 		break;
 		case 3: 
-			/* Matrix Multiplikation on GPU with shared Mem*/
+			/* Matrix Multiplication on GPU with shared Mem*/
 			//TODO
 
 		
