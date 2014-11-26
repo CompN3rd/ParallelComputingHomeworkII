@@ -6,6 +6,24 @@
 
 __constant__ int TILE_WIDTH;
 
+__global__ void MatrixMulKernelShared(float* Ad, float* Bd, float* Ed, int Width)
+{
+	__shared__ float A[TILE_WIDTH*TILE_WIDTH];
+	__shared__ float B[TILE_WIDTH*TILE_WIDTH];
+	__shared__ float E[TILE_WIDTH*TILE_WIDTH];
+	
+	int Row = blockIdx.y*TILE_WIDTH + threadIdx.y;
+	int Col = blockIdx.x*TILE_WIDTH + threadIdx.x;
+	
+	// save A and B in shared Memory
+	A[threadIdx.y*TILE_WIDTH+threadIdx.x] =	Ad(Row*Width+Col); // row wise
+	B[threadIdx.x*TILE_WIDTH+threadIdx.y] = Bd(Col*Width+Row); // col wise
+	
+	// Sync tu ensure that the memory is ready 
+	__syncthreads();
+
+		
+}
 __global__ void MatrixMulKernel(float* Md, float* Nd, float* Pd, int Width)
 {
 	// Calculate the row index of the Pd element and M
@@ -32,10 +50,10 @@ int main( int argc, char* argv[] )
 	
 	float *matrixA_h, *matrixB_h, *matrixA_d, *matrixB_d, *matrix_erg, *matrix_erg_d;
 		
-	int dimensionAx = 2;
-	int dimensionAy = 2;
-	int dimensionBy = 2;
-	int dimensionBx = 2;
+	int dimensionAx = 16;
+	int dimensionAy = 16;
+	int dimensionBy = 16;
+	int dimensionBx = 16;
 	
 	int sizeA = dimensionAx * dimensionAy * sizeof(float);
 	int sizeB = dimensionBx * dimensionBy * sizeof(float);
