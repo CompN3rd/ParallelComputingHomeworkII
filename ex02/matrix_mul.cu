@@ -6,6 +6,43 @@
 
 __constant__ int TILE_WIDTH;
 
+// Shared Memory implementation
+ __global__ void mat_mul(float *a, float *b, float *ab, int width)
+{
+	 //non square blocks not supported
+	 if (blockDim.x != blockDim.y)
+		 return;
+
+	// define tiles in accordance to blockDims
+	 int TX = blockDim.x;
+	 int TY = blockDim.y;
+
+	// shorthand
+	int tx = threadIdx.x, ty = threadIdx.y;
+	int bx = blockIdx.x, by = blockIdx.y;
+	// allocate tiles in __shared__ memory
+	__shared__ float s_a[TY][TX];
+	__shared__ float s_b[TY][TX];
+	// calculate the row & col index
+	int row = by*blockDim.y + ty;
+	int col = bx*blockDim.x + tx;
+	float result = 0;
+	// loop over the tiles of the input in phases
+	for(int p = 0; p < width/TX; ++p)
+	{
+		// collaboratively load tiles into __shared__
+		s_a[ty][tx] = a[row*width + (p*TX + tx)];
+		s_b[ty][tx] = b[(p*TY + ty)*width + col];
+		__syncthreads();
+		// dot product between row of s_a and col of s_b
+		for(int k = 0; k < TX; ++k)
+			result += s_a[ty][k] * s_b[k][tx];
+		__syncthreads();
+	}
+	ab[row*width+col] = result;
+}
+
+// naive global memory implementation
 __global__ void MatrixMulKernel(float* Md, float* Nd, float* Pd, int Width)
 {
 	// Calculate the row index of the Pd element and M
@@ -18,7 +55,7 @@ __global__ void MatrixMulKernel(float* Md, float* Nd, float* Pd, int Width)
 	for (int k = 0; k < Width; ++k)
 	{
 		// printf("\n Row/Col %d/%d Pvalue += A[%d] * B[%d]",Row,Col,Row*Width+k,k*Width+Col);
-		Pvalue += Md[Row*Width+k] * Nd[k+Width*Col];
+		Pvalue += Md[Row*Width+k] * Nd[k * Width + Col];
 	}
 	Pd[Row*Width+Col] = Pvalue;
 }
@@ -43,6 +80,10 @@ int main( int argc, char* argv[] )
 	matrixA_h  = (float*) malloc(sizeA);
 	matrixB_h  = (float*) malloc(sizeB);
 	matrix_erg = (float*) malloc(dimensionAy * dimensionBx * sizeof(float)); 
+
+	cudaMalloc(&matrixA_d, sizeA);
+	cudaMalloc(&matrixB_d, sizeB);
+	cudaMalloc(&matrix_erg_d,dimensionAx*dimensionBy*sizeof(float));
 	
 	int dimG = 2;				
 	int dimBX = (dimensionAx/dimG);
@@ -50,33 +91,36 @@ int main( int argc, char* argv[] )
 
 	cudaMemcpyToSymbol(&TILE_WIDTH,&dimBX,sizeof(int),0,cudaMemcpyHostToDevice);
 	
-	dim3 gridDim(dimG,dimG),blockDim(dimBX,dimBY);
+	dim3 gridDim(dimG, dimG);
+	dim3 blockDim(dimBX, dimBY);
 	
 	int x,y;
 	/*
-	 Initialize A and B^T like:
-	 |111....	|
-	 |222....	|
-	 |333		|
+	 Initialize A and B like:
+	 |1    2    3....	|
+	 |w+1  w+2....	|
+	 |2w+2 2w+2...		|
 	 |.			|
 	 |.			|
 	 A is stored row wise
-	 B is stores column wise 
+	 B is stored row wise 
 	 erg is stored row wise
 	*/
+	int counter = 0;
 	for(y=0; y<dimensionAy; y++)
 	{
 		for(x=0; x<dimensionAx; x++)
 		{
-			matrixA_h[x+(dimensionAx*y)] = y+1;
+			matrixA_h[x+(dimensionAx*y)] = ++counter;
 		}
 	}
 
+	counter = 0;
 	for(x=0; x<dimensionBx; x++)
 	{
 		for(y=0; y<dimensionBy; y++)
 		{
-			matrixB_h[y+(dimensionBy*x)] = y+1;
+			matrixB_h[x+(dimensionBx*y)] = ++counter;
 		}
 	}
 	/* // Print the Matrix
@@ -93,69 +137,88 @@ int main( int argc, char* argv[] )
 	
 	printf("\n nach dem initialisieren \n");
 	*/
-	switch(ToDo)
+	for(ToDo = 1; ToDo <= 3; ToDo++)
 	{
-		case 1:
-			initTimer (& timer );
-			int row,column,columnB;
-			/*********************************
- 			 *	Matrix Multiplikation on CPU * 
-			 *********************************/
-			for(row=0; row<dimensionAy; row++)
-			{
-				for(column=0; column<dimensionBx; column++)
+		switch(ToDo)
+		{
+			case 1:
+				initTimer (&timer);
+				int row,column,k;
+				/*********************************
+ 				*	Matrix Multiplikation on CPU * 
+				*********************************/
+				for(row=0; row<dimensionAy; row++)
 				{
-					//printf("\nErg[%d]=",(row*dimensionBx)+column);
-					matrix_erg[(row*dimensionBx)+column] = 0;						
-					for(columnB=0; columnB<dimensionBx; columnB++)
+					for(column=0; column<dimensionBx; column++)
 					{
-						//printf("+A[%d]*B[%d]", columnB+(dimensionAx*row),columnB+(dimensionBy*column));
-						matrix_erg[(row*dimensionBx)+column] += matrixA_h[columnB+(dimensionAx*row)] *matrixB_h[columnB+(dimensionBy*column)];
+						//printf("\nErg[%d]=",(row*dimensionBx)+column);
+						matrix_erg[(row*dimensionBx)+column] = 0;						
+						for(k=0; k < dimensionAx; k++)
+						{
+							//printf("+A[%d]*B[%d]", columnB+(dimensionAx*row),columnB+(dimensionBy*column));
+							matrix_erg[(row*dimensionBx)+column] += matrixA_h[(row * dimensionAx) + k] *matrixB_h[(k * dimensionBx) + column];
+						}
 					}
 				}
-			}
-			for(x=0; x<dimensionAy*dimensionBy; x++)
-			{
-				printf("\n erg[%d] %f ", x, matrix_erg[x]);
-			}
-			cudaThreadSynchronize(); 
-			duration = getTimer(&timer);
-		break;
-		case 2: 
+				duration = getTimer(&timer);
+
+				for(x=0; x<dimensionAy*dimensionBy; x++)
+				{
+					printf("\n erg[%d] %f ", x, matrix_erg[x]);
+				}
+				printf("\n duration: %f", duration);
+			break;
+			case 2: 
 			/* Matrix Multiplikation on GPU with device Mem*/
 			/****************************************************
  			 *	Matrix Multiplikation on GPU without shared Mem * 
 			 ****************************************************/
 			 // 
-				cudaMalloc(&matrixA_d, sizeA);
-				cudaMalloc(&matrixB_d, sizeB);
-				cudaMalloc(&matrix_erg_d,dimensionAx*dimensionBy*sizeof(float));
+					initTimer(&timer);
+					cudaMemcpy(matrixA_d,matrixA_h,sizeA, cudaMemcpyHostToDevice);
+					cudaMemcpy(matrixB_d,matrixB_h,sizeB, cudaMemcpyHostToDevice);
+				
+					/* need: 
+					*	maximal thread per block number
+					*  maximal number of block which run at the same time
+					*
+					*/
+					// {dimensionX | dimensionX € N , dimensionX % 2 = 0} 
+					// {dimensionY | dimensionY € N , dimensionY % 2 = 0} 
+
+					MatrixMulKernel<<<gridDim, blockDim>>>(matrixA_d,matrixB_d,matrix_erg_d,dimensionAx);
+
+					cudaMemcpy(matrix_erg, matrix_erg_d,dimensionAx*dimensionBy*sizeof(float) , cudaMemcpyDeviceToHost);
+					cudaThreadSynchronize();
+					duration = getTimer(&timer);
+
+					for(x=0; x<dimensionAy*dimensionBy; x++)
+					{
+						printf("\n erg[%d] %f ", x, matrix_erg[x]);
+					}
+					printf("\n duration: %f", duration);
+			break;
+
+			case 3: 
+				/* Matrix Multiplication on GPU with shared Mem*/
+				initTimer (&timer);
 				cudaMemcpy(matrixA_d,matrixA_h,sizeA, cudaMemcpyHostToDevice);
 				cudaMemcpy(matrixB_d,matrixB_h,sizeB, cudaMemcpyHostToDevice);
 				
-				/* need: 
-				 *	maximal thread per block number
-				 *  maximal number of block which run at the same time
-				 *
-				*/
-				// {dimensionX | dimensionX € N , dimensionX % 2 = 0} 
-				// {dimensionY | dimensionY € N , dimensionY % 2 = 0} 
-
-				MatrixMulKernel<<<gridDim,blockDim>>>(matrixA_d,matrixB_d,matrix_erg_d,dimensionAx);
+				mat_mul <<<gridDim, blockDim >>> (matrixA_d, matrixB_d, matrix_erg_d, dimensionAx);
 
 				cudaMemcpy(matrix_erg, matrix_erg_d,dimensionAx*dimensionBy*sizeof(float) , cudaMemcpyDeviceToHost);
+				cudaThreadSynchronize();
+
+				duration = getTimer(&timer);
 				for(x=0; x<dimensionAy*dimensionBy; x++)
 				{
 					printf("\n erg[%d] %f ", x, matrix_erg[x]);
 				}
-		break;
-		case 3: 
-			/* Matrix Multiplication on GPU with shared Mem*/
-			//TODO
+				printf("\n duration: %f", duration);
 
-		
-		break;
-
+			break;
+		}
 	}
 	
 	cudaFree(matrixA_d);
