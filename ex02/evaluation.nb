@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     49754,       1223]
-NotebookOptionsPosition[     47691,       1146]
-NotebookOutlinePosition[     48206,       1166]
-CellTagsIndexPosition[     48163,       1163]
+NotebookDataLength[     51994,       1283]
+NotebookOptionsPosition[     49931,       1206]
+NotebookOutlinePosition[     50446,       1226]
+CellTagsIndexPosition[     50403,       1223]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -29,7 +29,8 @@ Cell[BoxData[
 
 Cell[BoxData["\<\"C:\\\\Users\\\\WizardOf\\\\Documents\\\\Visual Studio \
 2013\\\\Projects\\\\ParallelComputingHomeworkII\\\\ex02\"\>"], "Output",
- CellChangeTimes->{3.626025200910006*^9, 3.626026598380846*^9}]
+ CellChangeTimes->{3.626025200910006*^9, 3.626026598380846*^9, 
+  3.6260670939054337`*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -82,7 +83,7 @@ Cell[BoxData[
     RowBox[{"12.555392`", ",", "0.35926`", ",", "0.377693`"}], "}"}]}], 
   "}"}]], "Output",
  CellChangeTimes->{3.6260255975009675`*^9, 3.6260263452376485`*^9, 
-  3.62602645673131*^9, 3.6260266021465206`*^9}]
+  3.62602645673131*^9, 3.6260266021465206`*^9, 3.626067097030456*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -115,7 +116,7 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"1024", ",", "12.555392`"}], "}"}]}], "}"}]], "Output",
  CellChangeTimes->{3.6260256216552067`*^9, 3.626026351350685*^9, 
-  3.626026458200079*^9, 3.626026603224676*^9}]
+  3.626026458200079*^9, 3.626026603224676*^9, 3.6260670974679985`*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -147,7 +148,7 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"1024", ",", "0.35926`"}], "}"}]}], "}"}]], "Output",
  CellChangeTimes->{3.626025650926349*^9, 3.626026352256936*^9, 
-  3.626026459262622*^9, 3.626026604443431*^9}]
+  3.626026459262622*^9, 3.626026604443431*^9, 3.6260670979992237`*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -179,7 +180,7 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"1024", ",", "0.377693`"}], "}"}]}], "}"}]], "Output",
  CellChangeTimes->{3.626025666617934*^9, 3.626026353085074*^9, 
-  3.626026460309478*^9, 3.626026605396101*^9}]
+  3.626026460309478*^9, 3.626026605396101*^9, 3.626067098999236*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -213,13 +214,14 @@ Cell[BoxData[
   "Grid"]], "Output",
  CellChangeTimes->{
   3.6260260908103385`*^9, {3.6260261343429904`*^9, 3.6260261513770733`*^9}, 
-   3.626026357975725*^9, 3.62602646549707*^9, 3.6260266063179655`*^9}]
+   3.626026357975725*^9, 3.62602646549707*^9, 3.6260266063179655`*^9, 
+   3.6260670999210997`*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell[BoxData[
- RowBox[{"ListPlot", "[", 
+ RowBox[{"ListLogPlot", "[", 
   RowBox[{
    RowBox[{"{", 
     RowBox[{"cpu", ",", "gpuGlobal", ",", "gpuShared"}], "}"}], ",", " ", 
@@ -243,69 +245,96 @@ Cell[BoxData[
    ",", 
    RowBox[{"ImageSize", "\[Rule]", "Large"}]}], "]"}]], "Input",
  CellChangeTimes->{{3.626025691009761*^9, 3.626025997171932*^9}, {
-  3.6260264436217628`*^9, 3.626026445903075*^9}}],
+  3.6260264436217628`*^9, 3.626026445903075*^9}, {3.626067103155601*^9, 
+  3.626067121143174*^9}}],
 
 Cell[BoxData[
  TemplateBox[{GraphicsBox[{{}, 
-     GraphicsComplexBox[{{2., 0.}, {16., 0.000036}, {256., 0.163386}, {1024., 
-      0.4}, {2., 0.000071}, {16., 0.000074}, {256., 0.004978}, {1024., 
-      0.35926}, {2., 0.000034}, {16., 0.000037}, {256., 0.005711}, {1024., 
-      0.377693}, {270.66425629555056`, 0.4}, {2., 0.}, {1024., 0.}, {2., 
-      0.}, {1024., 0.}, {1024., 0.}}, {{{}, {
+     GraphicsComplexBox[CompressedData["
+1:eJxTTMoPSmViYGAQBmIQDQEGDgvKWWcfL1M5AOEXOHSbhfyr/PNnP4Q/waHK
+Oyh1vy2LA1SDg82U2vk80soHYPqFVgnq3WFVhuvnmiYt9s9U9ABMvwtL8iyZ
+xA/7YfqV9yhWck9Rgevf6MsYdyADYf9Xd9O8kJUicP2NrQENoRrv99ulraxt
+ttR0uNtQYG5VDFPPgMafQLR85Xnl+/ONDNDk0fkI9QCsfFR/
+      "], {{{
          EdgeForm[], 
          Directive[
           RGBColor[0.368417, 0.506779, 0.709798], 
           Opacity[0.2]], 
          GraphicsGroupBox[{
-           PolygonBox[{{1, 18, 4, 13, 3, 2}}]}]}, {}, {
+           PolygonBox[{{17, 18, 1}}]}]}, {
+         EdgeForm[], 
+         Directive[
+          RGBColor[0.368417, 0.506779, 0.709798], 
+          Opacity[0.2]], 
+         GraphicsGroupBox[{
+           PolygonBox[{{17, 19, 3, 2}}]}]}, {}, {
          EdgeForm[], 
          Directive[
           RGBColor[0.880722, 0.611041, 0.142051], 
           Opacity[0.2]], 
          GraphicsGroupBox[{
-           PolygonBox[{{5, 16, 17, 8, 7, 6}}]}]}, {}, {
+           PolygonBox[{{4, 15, 16, 7, 6, 5}}]}]}, {
+         EdgeForm[], 
+         Directive[
+          RGBColor[0.560181, 0.691569, 0.194885], 
+          Opacity[0.2]], 
+         GraphicsGroupBox[{
+           PolygonBox[{{12, 13, 8}}]}]}, {
          EdgeForm[], 
          Directive[
           RGBColor[0.560181, 0.691569, 0.194885], 
           Opacity[0.2]], 
          GraphicsGroupBox[{
            
-           PolygonBox[{{9, 14, 15, 12, 11, 
-            10}}]}]}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, \
+           PolygonBox[{{12, 14, 11, 10, 
+            9}}]}]}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, \
 {}, {
          Hue[0.67, 0.6, 0.6], 
          Directive[
           PointSize[0.019444444444444445`], 
           RGBColor[0.368417, 0.506779, 0.709798], 
           AbsoluteThickness[1.6]], 
-         LineBox[{1, 2, 3, 13}]}, {
+         LineBox[{1, 17, 2, 3}]}, {
          Hue[0.9060679774997897, 0.6, 0.6], 
          Directive[
           PointSize[0.019444444444444445`], 
           RGBColor[0.880722, 0.611041, 0.142051], 
           AbsoluteThickness[1.6]], 
-         LineBox[{5, 6, 7, 8}]}, {
+         LineBox[{4, 5, 6, 7}]}, {
          Hue[0.1421359549995791, 0.6, 0.6], 
          Directive[
           PointSize[0.019444444444444445`], 
           RGBColor[0.560181, 0.691569, 0.194885], 
           AbsoluteThickness[1.6]], 
-         LineBox[{9, 10, 11, 12}]}}}], {}}, {
-    DisplayFunction -> Identity, PlotRangePadding -> {{0, 0}, {0, 0}}, 
-     AxesOrigin -> {0, 0}, PlotRange -> {{0, 1024}, {0, 0.4}}, 
+         LineBox[{8, 12, 9, 10, 11}]}}}], {}}, {
+    DisplayFunction -> Identity, GridLines -> {None, None}, DisplayFunction -> 
+     Identity, DisplayFunction -> Identity, 
+     PlotRangePadding -> {{0, 0}, {0, 0}}, 
+     AxesOrigin -> {0, -10.22505353210766}, 
+     PlotRange -> {{0, 1024}, {-10.289150033348113`, -0.916290731874155}}, 
      DisplayFunction -> Identity, AspectRatio -> 
      NCache[GoldenRatio^(-1), 0.6180339887498948], Axes -> {True, True}, 
      AxesLabel -> {
        FormBox["\"Matrix Size\"", TraditionalForm], 
-       FormBox["\"Time: s\"", TraditionalForm]}, AxesOrigin -> {0, 0}, 
-     DisplayFunction :> Identity, Frame -> {{False, False}, {False, False}}, 
-     FrameLabel -> {{None, None}, {None, None}}, 
-     FrameTicks -> {{Automatic, Automatic}, {Automatic, Automatic}}, 
+       FormBox["\"Time: s\"", TraditionalForm]}, 
+     AxesOrigin -> {0, -10.22505353210766}, 
+     CoordinatesToolOptions -> {"DisplayFunction" -> ({
+         Part[#, 1], 
+         Exp[
+          Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+         Part[#, 1], 
+         Exp[
+          Part[#, 2]]}& )}, DisplayFunction :> Identity, 
+     Frame -> {{False, False}, {False, False}}, 
+     FrameLabel -> {{None, None}, {None, None}}, FrameTicks -> {{
+        Charting`ScaledTicks[{Log, Exp}], 
+        Charting`ScaledFrameTicks[{Log, Exp}]}, {Automatic, Automatic}}, 
      GridLines -> {None, None}, GridLinesStyle -> Directive[
        GrayLevel[0.5, 0.4]], ImageSize -> Large, Method -> {}, 
-     PlotRange -> {{0, 1024}, {0, 0.4}}, PlotRangeClipping -> True, 
-     PlotRangePadding -> {{0, 0}, {0, 0}}, Ticks -> {Automatic, Automatic}}],
-   FormBox[
+     PlotRange -> {{0, 1024.}, {-10.289150033348113`, 2.5301502147426023`}}, 
+     PlotRangeClipping -> True, PlotRangePadding -> {{0, 0}, {0, 0}}, 
+     Ticks -> {Automatic, 
+       Charting`ScaledTicks[{Log, Exp}]}}],FormBox[
     FormBox[
      TemplateBox[{"\"cpu\"", "\"gpuGlobal\"", "\"gpuShared\""}, "PointLegend",
        DisplayFunction -> (FormBox[
@@ -583,7 +612,7 @@ Cell[BoxData[
  CellChangeTimes->{{3.626025694962925*^9, 3.626025713181899*^9}, 
    3.626025757095942*^9, {3.6260258140504055`*^9, 3.626025997703189*^9}, 
    3.6260263593351316`*^9, {3.626026446653078*^9, 3.626026463622041*^9}, 
-   3.6260266076148367`*^9}]
+   3.6260266076148367`*^9, {3.626067104561797*^9, 3.6260671216743765`*^9}}]
 }, Open  ]]
 }, Open  ]],
 
@@ -641,7 +670,7 @@ Cell[BoxData[
     RowBox[{"12.585375`", ",", "0.024356`", ",", "0.011233`"}], "}"}]}], 
   "}"}]], "Output",
  CellChangeTimes->{3.6260255975009675`*^9, 3.6260263666008415`*^9, 
-  3.626026469965844*^9, 3.6260266110055223`*^9}]
+  3.626026469965844*^9, 3.6260266110055223`*^9, 3.626067125235781*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -676,7 +705,7 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"32", ",", "12.585375`"}], "}"}]}], "}"}]], "Output",
  CellChangeTimes->{3.6260256216552067`*^9, 3.6260263811763797`*^9, 
-  3.626026470309577*^9, 3.6260266114586277`*^9}]
+  3.626026470309577*^9, 3.6260266114586277`*^9, 3.6260671259076815`*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -710,7 +739,7 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"32", ",", "0.024356`"}], "}"}]}], "}"}]], "Output",
  CellChangeTimes->{3.626025650926349*^9, 3.6260263901881523`*^9, 
-  3.62602647148147*^9, 3.626026612521157*^9}]
+  3.62602647148147*^9, 3.626026612521157*^9, 3.626067126548316*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -744,7 +773,7 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"32", ",", "0.011233`"}], "}"}]}], "}"}]], "Output",
  CellChangeTimes->{3.626025666617934*^9, 3.6260264027965755`*^9, 
-  3.6260264732807474`*^9, 3.6260266133805532`*^9}]
+  3.6260264732807474`*^9, 3.6260266133805532`*^9, 3.626067127235817*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -778,13 +807,14 @@ Cell[BoxData[
   "Grid"]], "Output",
  CellChangeTimes->{
   3.6260260908103385`*^9, {3.6260261343429904`*^9, 3.6260261513770733`*^9}, 
-   3.6260264081091146`*^9, 3.626026474358858*^9, 3.626026614224277*^9}]
+   3.6260264081091146`*^9, 3.626026474358858*^9, 3.626026614224277*^9, 
+   3.626067127907769*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell[BoxData[
- RowBox[{"ListPlot", "[", 
+ RowBox[{"ListLogPlot", "[", 
   RowBox[{
    RowBox[{"{", 
     RowBox[{"cpu", ",", "gpuGlobal", ",", "gpuShared"}], "}"}], ",", " ", 
@@ -808,35 +838,51 @@ Cell[BoxData[
    ",", 
    RowBox[{"ImageSize", "\[Rule]", "Large"}]}], "]"}]], "Input",
  CellChangeTimes->{{3.626025691009761*^9, 3.626025997171932*^9}, {
-  3.626026426982393*^9, 3.6260264345123596`*^9}}],
+  3.626026426982393*^9, 3.6260264345123596`*^9}, {3.6260671310789385`*^9, 
+  3.626067131391457*^9}}],
 
 Cell[BoxData[
  TemplateBox[{GraphicsBox[{{}, 
-     GraphicsComplexBox[{{2., 0.4}, {2., 0.}, {32., 0.}, {2., 0.}, {32., 
-      0.4}, {2., 0.35926}, {4., 0.105965}, {8., 0.04009}, {16., 0.027075}, {
-      32., 0.024356}, {2., 0.377693}, {4., 0.068}, {8., 0.019607}, {16., 
-      0.013327}, {32., 0.011233}, {32., 0.}, {2., 0.}, {32., 0.}}, {{{}, {
+     GraphicsComplexBox[CompressedData["
+1:eJxTTMoPSmViYGAQA2IQDQUOVd5BqfttWRwgXAEHn8a3QuFwvoLDiWidEgl7
+GN/AYUF13LIWON/BIXXmk3cLnWB8BgcXluRZMokf9sPM83Xbq8/5lfEAzDxP
+Idely3dzHoCZV9D5SaX9Ps8BmHnhfiseu+7gPQAzr7E1oCFU4z3cvPNJKz62
+N7LCzdNpPdtVXsIPN+/d7FdqM1wF4eb5pC3iXvRF8EDb3RezD26zcZglwf9y
+3QVBuPmofAeqyQMAj1Nf6A==
+      "], {{{}, {
          EdgeForm[], 
          Directive[
           RGBColor[0.368417, 0.506779, 0.709798], 
           Opacity[0.2]], 
          GraphicsGroupBox[{
-           PolygonBox[{{1, 17, 18, 5}}]}]}, {}, {
+           PolygonBox[{{1, 21, 22, 5, 4, 3, 2}}]}]}, {}, {
          EdgeForm[], 
          Directive[
           RGBColor[0.880722, 0.611041, 0.142051], 
           Opacity[0.2]], 
          GraphicsGroupBox[{
-           PolygonBox[{{6, 4, 16, 10, 9, 8, 7}}]}]}, {}, {
+           PolygonBox[{{6, 19, 20, 10, 9, 8, 7}}]}]}, {
+         EdgeForm[], 
+         Directive[
+          RGBColor[0.560181, 0.691569, 0.194885], 
+          Opacity[0.2]], 
+         GraphicsGroupBox[{
+           PolygonBox[{{15, 18, 16}}]}]}, {
          EdgeForm[], 
          Directive[
           RGBColor[0.560181, 0.691569, 0.194885], 
           Opacity[0.2]], 
          GraphicsGroupBox[{
            
-           PolygonBox[{{11, 2, 3, 15, 14, 13, 
+           PolygonBox[{{11, 17, 16, 14, 13, 
             12}}]}]}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}}, {{}, \
-{}, {}, {
+{}, {
+         Hue[0.67, 0.6, 0.6], 
+         Directive[
+          PointSize[0.019444444444444445`], 
+          RGBColor[0.368417, 0.506779, 0.709798], 
+          AbsoluteThickness[1.6]], 
+         LineBox[{1, 2, 3, 4, 5}]}, {
          Hue[0.9060679774997897, 0.6, 0.6], 
          Directive[
           PointSize[0.019444444444444445`], 
@@ -848,21 +894,35 @@ Cell[BoxData[
           PointSize[0.019444444444444445`], 
           RGBColor[0.560181, 0.691569, 0.194885], 
           AbsoluteThickness[1.6]], 
-         LineBox[{11, 12, 13, 14, 15}]}}}], {}}, {
-    DisplayFunction -> Identity, PlotRangePadding -> {{0, 0}, {0, 0}}, 
-     AxesOrigin -> {0, 0}, PlotRange -> {{0, 32}, {0, 0.4}}, DisplayFunction -> 
-     Identity, AspectRatio -> NCache[GoldenRatio^(-1), 0.6180339887498948], 
-     Axes -> {True, True}, AxesLabel -> {
+         LineBox[{11, 12, 13, 14, 16, 15}]}}}], {}}, {
+    DisplayFunction -> Identity, GridLines -> {None, None}, DisplayFunction -> 
+     Identity, DisplayFunction -> Identity, 
+     PlotRangePadding -> {{0, 0}, {0, 0}}, 
+     AxesOrigin -> {0, -4.453792230173486}, 
+     PlotRange -> {{0, 32}, {-4.488899404322705, -0.916290731874155}}, 
+     DisplayFunction -> Identity, AspectRatio -> 
+     NCache[GoldenRatio^(-1), 0.6180339887498948], Axes -> {True, True}, 
+     AxesLabel -> {
        FormBox["\"Matrix Size\"", TraditionalForm], 
-       FormBox["\"Time: s\"", TraditionalForm]}, AxesOrigin -> {0, 0}, 
-     DisplayFunction :> Identity, Frame -> {{False, False}, {False, False}}, 
-     FrameLabel -> {{None, None}, {None, None}}, 
-     FrameTicks -> {{Automatic, Automatic}, {Automatic, Automatic}}, 
+       FormBox["\"Time: s\"", TraditionalForm]}, 
+     AxesOrigin -> {0, -4.453792230173486}, 
+     CoordinatesToolOptions -> {"DisplayFunction" -> ({
+         Part[#, 1], 
+         Exp[
+          Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+         Part[#, 1], 
+         Exp[
+          Part[#, 2]]}& )}, DisplayFunction :> Identity, 
+     Frame -> {{False, False}, {False, False}}, 
+     FrameLabel -> {{None, None}, {None, None}}, FrameTicks -> {{
+        Charting`ScaledTicks[{Log, Exp}], 
+        Charting`ScaledFrameTicks[{Log, Exp}]}, {Automatic, Automatic}}, 
      GridLines -> {None, None}, GridLinesStyle -> Directive[
        GrayLevel[0.5, 0.4]], ImageSize -> Large, Method -> {}, 
-     PlotRange -> {{0, 32}, {0, 0.4}}, PlotRangeClipping -> True, 
-     PlotRangePadding -> {{0, 0}, {0, 0}}, Ticks -> {Automatic, Automatic}}],
-   FormBox[
+     PlotRange -> {{0, 32.}, {-4.488899404322705, 2.532535425521177}}, 
+     PlotRangeClipping -> True, PlotRangePadding -> {{0, 0}, {0, 0}}, 
+     Ticks -> {Automatic, 
+       Charting`ScaledTicks[{Log, Exp}]}}],FormBox[
     FormBox[
      TemplateBox[{"\"cpu\"", "\"gpuGlobal\"", "\"gpuShared\""}, "PointLegend",
        DisplayFunction -> (FormBox[
@@ -1140,7 +1200,7 @@ Cell[BoxData[
  CellChangeTimes->{{3.626025694962925*^9, 3.626025713181899*^9}, 
    3.626025757095942*^9, {3.6260258140504055`*^9, 3.626025997703189*^9}, {
    3.626026417781134*^9, 3.6260264354341736`*^9}, 3.6260264764682665`*^9, 
-   3.626026615255535*^9}]
+   3.626026615255535*^9, 3.6260671319227176`*^9}]
 }, Open  ]]
 }, Open  ]]
 },
@@ -1167,62 +1227,62 @@ CellTagsIndex->{}
 Notebook[{
 Cell[CellGroupData[{
 Cell[580, 22, 269, 5, 31, "Input"],
-Cell[852, 29, 210, 2, 31, "Output"]
+Cell[852, 29, 237, 3, 31, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[1099, 36, 109, 1, 63, "Section"],
-Cell[1211, 39, 219, 6, 31, "Input"],
+Cell[1126, 37, 109, 1, 63, "Section"],
+Cell[1238, 40, 219, 6, 31, "Input"],
 Cell[CellGroupData[{
-Cell[1455, 49, 894, 20, 31, "Input"],
-Cell[2352, 71, 538, 13, 31, "Output"]
+Cell[1482, 50, 894, 20, 31, "Input"],
+Cell[2379, 72, 560, 13, 31, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[2927, 89, 516, 14, 31, "Input"],
-Cell[3446, 105, 435, 12, 31, "Output"]
+Cell[2976, 90, 516, 14, 31, "Input"],
+Cell[3495, 106, 459, 12, 31, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[3918, 122, 473, 13, 31, "Input"],
-Cell[4394, 137, 437, 12, 31, "Output"]
+Cell[3991, 123, 473, 13, 31, "Input"],
+Cell[4467, 138, 461, 12, 31, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[4868, 154, 473, 13, 31, "Input"],
-Cell[5344, 169, 438, 12, 31, "Output"]
+Cell[4965, 155, 473, 13, 31, "Input"],
+Cell[5441, 170, 460, 12, 31, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[5819, 186, 676, 14, 31, "Input"],
-Cell[6498, 202, 586, 13, 84, "Output"]
+Cell[5938, 187, 676, 14, 31, "Input"],
+Cell[6617, 203, 614, 14, 84, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[7121, 220, 941, 25, 52, "Input"],
-Cell[8065, 247, 16183, 338, 360, "Output"]
+Cell[7268, 222, 993, 26, 52, "Input"],
+Cell[8264, 250, 17063, 364, 350, "Output"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[24297, 591, 181, 2, 63, "Section"],
-Cell[24481, 595, 274, 7, 31, "Input"],
+Cell[25376, 620, 181, 2, 63, "Section"],
+Cell[25560, 624, 274, 7, 31, "Input"],
 Cell[CellGroupData[{
-Cell[24780, 606, 897, 20, 31, "Input"],
-Cell[25680, 628, 638, 15, 52, "Output"]
+Cell[25859, 635, 897, 20, 31, "Input"],
+Cell[26759, 657, 660, 15, 52, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[26355, 648, 518, 14, 31, "Input"],
-Cell[26876, 664, 512, 14, 31, "Output"]
+Cell[27456, 677, 518, 14, 31, "Input"],
+Cell[27977, 693, 536, 14, 31, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[27425, 683, 473, 13, 31, "Input"],
-Cell[27901, 698, 500, 14, 31, "Output"]
+Cell[28550, 712, 473, 13, 31, "Input"],
+Cell[29026, 727, 522, 14, 31, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[28438, 717, 470, 13, 31, "Input"],
-Cell[28911, 732, 504, 14, 31, "Output"]
+Cell[29585, 746, 470, 13, 31, "Input"],
+Cell[30058, 761, 526, 14, 31, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[29452, 751, 676, 14, 31, "Input"],
-Cell[30131, 767, 633, 13, 84, "Output"]
+Cell[30621, 780, 676, 14, 31, "Input"],
+Cell[31300, 796, 659, 14, 84, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[30801, 785, 939, 25, 52, "Input"],
-Cell[31743, 812, 15920, 330, 393, "Output"]
+Cell[31996, 815, 993, 26, 52, "Input"],
+Cell[32992, 843, 16911, 359, 386, "Output"]
 }, Open  ]]
 }, Open  ]]
 }
