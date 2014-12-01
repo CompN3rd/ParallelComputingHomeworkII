@@ -9,9 +9,12 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
-#define NON_BOUND_ELEMENTS 2048
+#define NON_BOUND_ELEMENTS 512
 #define GRID_SIZE 16
 #define NUM_ITERATIONS 20
+#define ALPHA 0.1f
+#define DELTA_T 1.0f
+#define H 1.0f
 
 // texture object declarations
 texture<float, cudaTextureType2D, cudaReadModeElementType> inputTex;
@@ -45,11 +48,11 @@ __global__ void laplaceTextureStep(float* nextTime, int gridWidth, float alpha, 
 	int colIndex = blockIdx.x * blockDim.x + threadIdx.x + 1;
 
 	//fetch data from inputTex
-	float currentPos = tex2Dfetch(inputTex, rowIndex, colIndex);
-	float rightPos = tex2Dfetch(inputTex, rowIndex, colIndex + 1);
-	float leftPos = tex2Dfetch(inputTex, rowIndex, colIndex - 1);
-	float topPos = tex2Dfetch(inputTex, rowIndex - 1, colIndex);
-	float bottomPos = tex2Dfetch(inputTex, rowIndex + 1, colIndex);
+	float currentPos = tex2D(inputTex, colIndex, rowIndex);
+	float rightPos = tex2D(inputTex, colIndex + 1, rowIndex);
+	float leftPos = tex2D(inputTex, colIndex - 1, rowIndex);
+	float topPos = tex2D(inputTex, colIndex, rowIndex - 1);
+	float bottomPos = tex2D(inputTex, colIndex, rowIndex + 1);
 
 	//writing back same as in global memory kernel
 	nextTime[getLinearIndex(rowIndex, colIndex, gridWidth)] = currentPos + alpha * deltaT / (h * h) * (topPos + bottomPos + rightPos + leftPos - 4 * currentPos);
@@ -100,29 +103,68 @@ int main()
 	cudaMemcpy(d_nextTime, h_nextTime, arraySize * arraySize * sizeof(float), cudaMemcpyHostToDevice);
 
 	//loop over discrete time steps
-	for(int i = 0; i < 20; i++)
+	for(int i = 0; i < NUM_ITERATIONS; i++)
 	{
 		//execute kernel with swapping input and output
 		if(i % 2 == 0)
 		{
-			laplaceGlobalStep<<<grid, block>>>(d_currentTime, d_nextTime, 2 + NON_BOUND_ELEMENTS, 1.0f, 1.0f, 1.0f);
+			laplaceGlobalStep << <grid, block >> >(d_currentTime, d_nextTime, arraySize, ALPHA, DELTA_T, H);
 
 			//copy back to host
 			cudaMemcpy(h_currentTime, d_currentTime, arraySize * arraySize * sizeof(float), cudaMemcpyDeviceToHost);
 
 			//write to memory
-			writeVTK("globalMem", i, 2 + NON_BOUND_ELEMENTS, 2 + NON_BOUND_ELEMENTS, h_currentTime);
+			writeVTK("globalMem", i, arraySize, arraySize, h_currentTime);
 		}
 		else
 		{
-			laplaceGlobalStep<<<grid, block>>>(d_nextTime, d_currentTime, 2 + NON_BOUND_ELEMENTS, 1.0f, 1.0f, 1.0f);
+			laplaceGlobalStep << <grid, block >> >(d_nextTime, d_currentTime, arraySize, ALPHA, DELTA_T, H);
 
 			//copy back to host
 			cudaMemcpy(h_nextTime, d_nextTime, arraySize * arraySize * sizeof(float), cudaMemcpyDeviceToHost);
 
 			//write to memory
-			writeVTK("globalMem", i, 2 + NON_BOUND_ELEMENTS, 2 + NON_BOUND_ELEMENTS, h_nextTime);
+			writeVTK("globalMem", i, arraySize, arraySize, h_nextTime);
 		}
 	}
+
+	//texture memory case
+	initializeArrays(h_currentTime, h_nextTime, arraySize);
+
+	cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc(32, 0, 0, 0, cudaChannelFormatKindFloat);
+
+	cudaArray* cuArray;
+	cudaMallocArray(&cuArray, &channelDesc, arraySize, arraySize);
+
+	cudaMemcpyToArray(cuArray, 0, 0, h_currentTime, arraySize * arraySize * sizeof(float), cudaMemcpyHostToDevice);
+
+	inputTex.addressMode[0] = cudaAddressModeClamp;
+	inputTex.addressMode[1] = cudaAddressModeClamp;
+	inputTex.filterMode = cudaFilterModePoint;
+	inputTex.normalized = false;
+
+	cudaBindTextureToArray(inputTex, cuArray, channelDesc);
+
+	for (int i = 0; i < NUM_ITERATIONS; i++)
+	{
+		laplaceTextureStep << < grid, block >> >(d_nextTime, arraySize, ALPHA, DELTA_T, H);
+
+		//copy result back to host:
+		cudaMemcpyFromArray(h_currentTime, cuArray, 0, 0, arraySize * arraySize * sizeof(float), cudaMemcpyDeviceToHost);
+
+		//copy result to array for next iteration
+		cudaMemcpyToArray(cuArray, 0, 0, d_nextTime, arraySize * arraySize * sizeof(float), cudaMemcpyDeviceToDevice);
+
+		//write output
+		writeVTK("textureMem", i, arraySize, arraySize, h_currentTime);
+	}
+
+
+	// free memory
+	free(h_currentTime);
+	free(h_nextTime);
+	cudaFree(d_nextTime);
+	cudaFree(d_currentTime);
+
 	return 0;
 }
