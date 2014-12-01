@@ -10,7 +10,7 @@
 #include "device_launch_parameters.h"
 
 #define NON_BOUND_ELEMENTS 512
-#define GRID_SIZE 16
+#define BLOCK_SIZE 16
 #define NUM_ITERATIONS 20
 #define ALPHA 0.1f
 #define DELTA_T 1.0f
@@ -58,6 +58,51 @@ __global__ void laplaceTextureStep(float* nextTime, int gridWidth, float alpha, 
 	nextTime[getLinearIndex(rowIndex, colIndex, gridWidth)] = currentPos + alpha * deltaT / (h * h) * (topPos + bottomPos + rightPos + leftPos - 4 * currentPos);
 }
 
+__global__ void laplaceTextureSharedStep(float* nextTime, int gridWidth, float alpha, float deltaT, float h)
+{
+	__shared__ float block[BLOCK_SIZE][BLOCK_SIZE];
+
+	// shift indices by 1 -> larger Input Grid for boundary conditions
+	int localRow = threadIdx.y;
+	int localCol = threadIdx.x;
+	int rowIndex = blockIdx.y * blockDim.y + threadIdx.y + 1;
+	int colIndex = blockIdx.x * blockDim.x + threadIdx.x + 1;
+
+	//fetch data cooperatively in block
+	block[localRow][localCol] = tex2D(inputTex, colIndex, rowIndex);
+	__syncthreads();
+
+	//fetch data from shared block except those over the edge
+	float currentPos = block[localRow][localCol];
+
+	float rightPos = 0;
+	if (localCol + 1 < BLOCK_SIZE)
+		rightPos = block[localRow][localCol + 1];
+	else
+		rightPos = tex2D(inputTex, colIndex + 1, rowIndex);
+
+	float leftPos = 0;
+	if (localCol - 1 >= 0)
+		leftPos = block[localRow][localCol - 1];
+	else
+		leftPos = tex2D(inputTex, colIndex - 1, rowIndex);
+
+	float topPos = 0;
+	if (localRow - 1 >= 0)
+		topPos = block[localRow - 1][localCol];
+	else
+		topPos = tex2D(inputTex, colIndex, rowIndex - 1);
+
+	float bottomPos = 0;
+	if (localRow + 1 < BLOCK_SIZE)
+		bottomPos = block[localRow + 1][localCol];
+	else
+		bottomPos = tex2D(inputTex, colIndex, rowIndex + 1);
+
+	//writing back same as in global memory kernel
+	nextTime[getLinearIndex(rowIndex, colIndex, gridWidth)] = currentPos + alpha * deltaT / (h * h) * (topPos + bottomPos + rightPos + leftPos - 4 * currentPos);
+}
+
 void initializeArrays(float* currentTime, float* nextTime, int arrayWidth)
 {
 	//initialize host memory:
@@ -82,7 +127,7 @@ void initializeArrays(float* currentTime, float* nextTime, int arrayWidth)
 int main()
 {
 	int arraySize = NON_BOUND_ELEMENTS + 2;
-	dim3 block(16,16);
+	dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 	dim3 grid(NON_BOUND_ELEMENTS / block.x, NON_BOUND_ELEMENTS / block.y);
 
 	float* h_currentTime = (float*) malloc(arraySize * arraySize * sizeof(float));
@@ -135,7 +180,6 @@ int main()
 
 	cudaArray* cuArray;
 	cudaMallocArray(&cuArray, &channelDesc, arraySize, arraySize);
-
 	cudaMemcpyToArray(cuArray, 0, 0, h_currentTime, arraySize * arraySize * sizeof(float), cudaMemcpyHostToDevice);
 
 	inputTex.addressMode[0] = cudaAddressModeClamp;
@@ -159,6 +203,34 @@ int main()
 		writeVTK("textureMem", i, arraySize, arraySize, h_currentTime);
 	}
 
+	cudaUnbindTexture(inputTex);
+	cudaFreeArray(cuArray);
+
+	//texture + shared memory case
+	initializeArrays(h_currentTime, h_nextTime, arraySize);
+
+	//initializations as before
+	cudaMallocArray(&cuArray, &channelDesc, arraySize, arraySize);
+	cudaMemcpyToArray(cuArray, 0, 0, h_currentTime, arraySize * arraySize * sizeof(float), cudaMemcpyHostToDevice);
+
+	cudaBindTextureToArray(inputTex, cuArray, channelDesc);
+
+	for (int i = 0; i < NUM_ITERATIONS; i++)
+	{
+		laplaceTextureSharedStep << < grid, block >> >(d_nextTime, arraySize, ALPHA, DELTA_T, H);
+
+		//copy result back to host:
+		cudaMemcpyFromArray(h_currentTime, cuArray, 0, 0, arraySize * arraySize * sizeof(float), cudaMemcpyDeviceToHost);
+
+		//copy result to array for next iteration
+		cudaMemcpyToArray(cuArray, 0, 0, d_nextTime, arraySize * arraySize * sizeof(float), cudaMemcpyDeviceToDevice);
+
+		//write output
+		writeVTK("textureSharedMem", i, arraySize, arraySize, h_currentTime);
+	}
+
+	cudaUnbindTexture(inputTex);
+	cudaFreeArray(cuArray);
 
 	// free memory
 	free(h_currentTime);
