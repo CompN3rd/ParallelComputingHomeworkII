@@ -35,7 +35,7 @@
 	ab[row*width+col] = result;
 }
 
-// naive global memory implementation
+
 __global__ void MatrixMulKernel(float* Md, float* Nd, float* Pd, int Width)
 {
 	// Calculate the row index of the Pd element and M
@@ -61,10 +61,12 @@ int main( int argc, char* argv[] )
     // Define memory pointers and dimensions
 	float *matrixA_h, *matrixB_h, *matrixA_d, *matrixB_d, *matrix_erg, *matrix_erg_d;
 		
+
 	int dimensionAx = WIDTH;
 	int dimensionAy = WIDTH;
 	int dimensionBy = WIDTH;
 	int dimensionBx = WIDTH;
+
 	
 	int sizeA = dimensionAx * dimensionAy * sizeof(float);
 	int sizeB = dimensionBx * dimensionBy * sizeof(float);
