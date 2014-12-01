@@ -166,5 +166,7 @@ int main()
 	cudaFree(d_nextTime);
 	cudaFree(d_currentTime);
 
+	cudaDeviceReset();
+
 	return 0;
 }
