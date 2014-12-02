@@ -35,7 +35,7 @@ void writeVTK(char* caseName, int t_iter, int nx, int ny, float *u) {
         strcat(name,end);
     }
 
-    printf("Writing file %s...",name);
+    //printf("Writing file %s...",name);
     
     file = fopen(name,"w");
     fprintf(file,"# vtk DataFile Version 2.0\n");
@@ -57,6 +57,6 @@ void writeVTK(char* caseName, int t_iter, int nx, int ny, float *u) {
     
     fclose(file);
 
-    printf("done.\n");
+    //printf("done.\n");
 }
 #endif

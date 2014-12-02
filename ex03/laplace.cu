@@ -195,6 +195,7 @@ int main()
 
 		//copy result back to host:
 		cudaMemcpyFromArray(h_currentTime, cuArray, 0, 0, arraySize * arraySize * sizeof(float), cudaMemcpyDeviceToHost);
+		cudaThreadSynchronize();
 
 		//copy result to array for next iteration
 		cudaMemcpyToArray(cuArray, 0, 0, d_nextTime, arraySize * arraySize * sizeof(float), cudaMemcpyDeviceToDevice);
@@ -204,7 +205,6 @@ int main()
 	}
 
 	cudaUnbindTexture(inputTex);
-	cudaFreeArray(cuArray);
 
 	//texture + shared memory case
 	initializeArrays(h_currentTime, h_nextTime, arraySize);
@@ -221,6 +221,7 @@ int main()
 
 		//copy result back to host:
 		cudaMemcpyFromArray(h_currentTime, cuArray, 0, 0, arraySize * arraySize * sizeof(float), cudaMemcpyDeviceToHost);
+		cudaThreadSynchronize();
 
 		//copy result to array for next iteration
 		cudaMemcpyToArray(cuArray, 0, 0, d_nextTime, arraySize * arraySize * sizeof(float), cudaMemcpyDeviceToDevice);
@@ -230,9 +231,40 @@ int main()
 	}
 
 	cudaUnbindTexture(inputTex);
-	cudaFreeArray(cuArray);
+
+	//texture + no copy version
+	free(h_nextTime);
+	cudaFree(d_nextTime);
+
+	// make h_nextTime and d_nextTime big enough to hold all results
+	h_nextTime = (float*)malloc(NUM_ITERATIONS * arraySize * arraySize * sizeof(float));
+	cudaMalloc((void**)&d_nextTime, NUM_ITERATIONS * arraySize * arraySize * sizeof(float));
+
+	initializeArrays(h_currentTime, h_nextTime, arraySize);
+	cudaMemcpyToArray(cuArray, 0, 0, h_currentTime, arraySize * arraySize * sizeof(float), cudaMemcpyHostToDevice);
+
+	cudaBindTextureToArray(inputTex, cuArray, channelDesc);
+
+	for (int i = 0; i < NUM_ITERATIONS; i++)
+	{
+		laplaceTextureStep << <grid, block >> >(d_nextTime + i * arraySize * arraySize, arraySize, ALPHA, DELTA_T, H);
+
+		//don't copy back to host, just to array for next iteration
+		cudaMemcpyToArray(cuArray, 0, 0, d_nextTime + i * arraySize * arraySize, arraySize * arraySize * sizeof(float), cudaMemcpyDeviceToDevice);
+	}
+
+	//download all results:
+	cudaMemcpyFromArray(h_nextTime, cuArray, 0, 0, NUM_ITERATIONS * arraySize * arraySize * sizeof(float), cudaMemcpyDeviceToHost);
+
+	//output all results
+	for (int i = 0; i < NUM_ITERATIONS; i++)
+	{
+		writeVTK("textureNoCopyMem", i, arraySize, arraySize, h_nextTime + i * arraySize * arraySize);
+	}
 
 	// free memory
+	cudaUnbindTexture(inputTex);
+	cudaFreeArray(cuArray);
 	free(h_currentTime);
 	free(h_nextTime);
 	cudaFree(d_nextTime);
