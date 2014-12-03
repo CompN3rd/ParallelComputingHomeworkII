@@ -1,13 +1,51 @@
-#ifndef _WIN32
-#include "cuda_utils.h"
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "writeVTK.h"
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
+
+#ifndef _WIN32
+#include "cuda_utils.h"
+#else
+#include <Windows.h>
+struct Timer
+{
+	LARGE_INTEGER frequency;
+	LARGE_INTEGER start;
+	LARGE_INTEGER end;
+
+	double time = 0.0;
+};
+
+void startTimer(Timer& timer)
+{
+	if (QueryPerformanceFrequency(&timer.frequency) == FALSE)
+	{
+		fprintf(stderr, "QueryPerformanceFrequency failed \n");
+		exit(1);
+	}
+
+	if (QueryPerformanceCounter(&timer.start) == FALSE)
+	{
+		fprintf(stderr, "QueryPerformanceCounter failed \n");
+		exit(1);
+	}
+}
+
+double stopTimer(Timer& timer)
+{
+	if (QueryPerformanceCounter(&timer.end) == FALSE)
+	{
+		fprintf(stderr, "QueryPerformanceCounter failed \n");
+		exit(1);
+	}
+
+	return static_cast<double>(timer.end.QuadPart - timer.start.QuadPart) / timer.frequency.QuadPart;
+}
+
+#endif
+
 
 #define NON_BOUND_ELEMENTS 512
 #define BLOCK_SIZE 16
@@ -39,7 +77,7 @@ __global__ void laplaceGlobalStep(float* currentTime, float* nextTime, int gridW
 
 	// explicit finite differences formula
 	nextTime[getLinearIndex(rowIndex, colIndex, gridWidth)] = currentPos + alpha * deltaT / (h * h) * (topPos + bottomPos + rightPos + leftPos - 4 * currentPos);
-} 
+}
 
 __global__ void laplaceTextureStep(float* nextTime, int gridWidth, float alpha, float deltaT, float h)
 {
@@ -126,12 +164,15 @@ void initializeArrays(float* currentTime, float* nextTime, int arrayWidth)
 
 int main()
 {
+	Timer t;
+	double time; 
+
 	int arraySize = NON_BOUND_ELEMENTS + 2;
 	dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 	dim3 grid(NON_BOUND_ELEMENTS / block.x, NON_BOUND_ELEMENTS / block.y);
 
-	float* h_currentTime = (float*) malloc(arraySize * arraySize * sizeof(float));
-	float* h_nextTime = (float*) malloc(arraySize * arraySize * sizeof(float));
+	float* h_currentTime = (float*)malloc(arraySize * arraySize * sizeof(float));
+	float* h_nextTime = (float*)malloc(arraySize * arraySize * sizeof(float));
 
 	//intialize arrays:
 	initializeArrays(h_currentTime, h_nextTime, arraySize);
@@ -140,38 +181,45 @@ int main()
 	float* d_currentTime = NULL;
 	float* d_nextTime = NULL;
 
-	cudaMalloc((void**) &d_currentTime, arraySize * arraySize * sizeof(float));
-	cudaMalloc((void**) &d_nextTime, arraySize * arraySize * sizeof(float));
+	cudaMalloc((void**)&d_currentTime, arraySize * arraySize * sizeof(float));
+	cudaMalloc((void**)&d_nextTime, arraySize * arraySize * sizeof(float));
 
 	//copy
 	cudaMemcpy(d_currentTime, h_currentTime, arraySize * arraySize * sizeof(float), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_nextTime, h_nextTime, arraySize * arraySize * sizeof(float), cudaMemcpyHostToDevice);
 
+	time = 0.0;
 	//loop over discrete time steps
-	for(int i = 0; i < NUM_ITERATIONS; i++)
+	for (int i = 0; i < NUM_ITERATIONS; i++)
 	{
 		//execute kernel with swapping input and output
-		if(i % 2 == 0)
+		if (i % 2 == 0)
 		{
+			startTimer(t);
 			laplaceGlobalStep << <grid, block >> >(d_currentTime, d_nextTime, arraySize, ALPHA, DELTA_T, H);
 
 			//copy back to host
 			cudaMemcpy(h_currentTime, d_currentTime, arraySize * arraySize * sizeof(float), cudaMemcpyDeviceToHost);
+			time += stopTimer(t);
 
 			//write to memory
 			writeVTK("globalMem", i, arraySize, arraySize, h_currentTime);
 		}
 		else
 		{
+			startTimer(t);
 			laplaceGlobalStep << <grid, block >> >(d_nextTime, d_currentTime, arraySize, ALPHA, DELTA_T, H);
 
 			//copy back to host
 			cudaMemcpy(h_nextTime, d_nextTime, arraySize * arraySize * sizeof(float), cudaMemcpyDeviceToHost);
+			time += stopTimer(t);
 
 			//write to memory
 			writeVTK("globalMem", i, arraySize, arraySize, h_nextTime);
 		}
 	}
+
+	printf("Global Memory Time: %f\n", time);
 
 	//texture memory case
 	initializeArrays(h_currentTime, h_nextTime, arraySize);
@@ -189,20 +237,24 @@ int main()
 
 	cudaBindTextureToArray(inputTex, cuArray, channelDesc);
 
+	time = 0.0;
 	for (int i = 0; i < NUM_ITERATIONS; i++)
 	{
+		startTimer(t);
 		laplaceTextureStep << < grid, block >> >(d_nextTime, arraySize, ALPHA, DELTA_T, H);
 
 		//copy result back to host:
 		cudaMemcpyFromArray(h_currentTime, cuArray, 0, 0, arraySize * arraySize * sizeof(float), cudaMemcpyDeviceToHost);
-		cudaThreadSynchronize();
 
 		//copy result to array for next iteration
 		cudaMemcpyToArray(cuArray, 0, 0, d_nextTime, arraySize * arraySize * sizeof(float), cudaMemcpyDeviceToDevice);
+		time += stopTimer(t);
 
 		//write output
 		writeVTK("textureMem", i, arraySize, arraySize, h_currentTime);
 	}
+
+	printf("Texture Memory Time: %f\n", time);
 
 	cudaUnbindTexture(inputTex);
 
@@ -215,20 +267,24 @@ int main()
 
 	cudaBindTextureToArray(inputTex, cuArray, channelDesc);
 
+	time = 0;
 	for (int i = 0; i < NUM_ITERATIONS; i++)
 	{
+		startTimer(t);
 		laplaceTextureSharedStep << < grid, block >> >(d_nextTime, arraySize, ALPHA, DELTA_T, H);
 
 		//copy result back to host:
-		cudaMemcpyFromArray(h_currentTime, cuArray, 0, 0, arraySize * arraySize * sizeof(float), cudaMemcpyDeviceToHost);
-		cudaThreadSynchronize();
+		cudaMemcpy(h_currentTime, d_nextTime, arraySize * arraySize * sizeof(float), cudaMemcpyDeviceToHost);
 
 		//copy result to array for next iteration
 		cudaMemcpyToArray(cuArray, 0, 0, d_nextTime, arraySize * arraySize * sizeof(float), cudaMemcpyDeviceToDevice);
+		time += stopTimer(t);
 
 		//write output
 		writeVTK("textureSharedMem", i, arraySize, arraySize, h_currentTime);
 	}
+
+	printf("Texture Shared Memory Time: %f\n", time);
 
 	cudaUnbindTexture(inputTex);
 
@@ -242,19 +298,25 @@ int main()
 
 	initializeArrays(h_currentTime, h_nextTime, arraySize);
 	cudaMemcpyToArray(cuArray, 0, 0, h_currentTime, arraySize * arraySize * sizeof(float), cudaMemcpyHostToDevice);
+	cudaMemset(d_nextTime, 0, NUM_ITERATIONS * arraySize * arraySize * sizeof(float));
 
 	cudaBindTextureToArray(inputTex, cuArray, channelDesc);
 
+	time = 0;
+	startTimer(t);
 	for (int i = 0; i < NUM_ITERATIONS; i++)
 	{
 		laplaceTextureStep << <grid, block >> >(d_nextTime + i * arraySize * arraySize, arraySize, ALPHA, DELTA_T, H);
 
-		//don't copy back to host, just to array for next iteration
+		//don't copy back to host, just to cuArray for next iteration
 		cudaMemcpyToArray(cuArray, 0, 0, d_nextTime + i * arraySize * arraySize, arraySize * arraySize * sizeof(float), cudaMemcpyDeviceToDevice);
 	}
 
 	//download all results:
-	cudaMemcpyFromArray(h_nextTime, cuArray, 0, 0, NUM_ITERATIONS * arraySize * arraySize * sizeof(float), cudaMemcpyDeviceToHost);
+	cudaMemcpy(h_nextTime, d_nextTime, NUM_ITERATIONS * arraySize * arraySize * sizeof(float), cudaMemcpyDeviceToHost);
+
+	time += stopTimer(t);
+	printf("Texture + No Copy Memory Time: %f\n", time);
 
 	//output all results
 	for (int i = 0; i < NUM_ITERATIONS; i++)
