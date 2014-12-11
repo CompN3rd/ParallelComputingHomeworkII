@@ -64,11 +64,52 @@ int main()
 	int max_iter = 1000;
 
 	// Setup monitor
-	
+	cusp::default_monitor<float> monitor(b, max_iter, tol);
 	// Setup preconditioner (identity preconditioner is equivalent to nothing!)
-
+	int method=0;
+	int precond=0;
+	
+	char * printOut;
+	
+	for(method=0; method<3, method++)
+	{
+		for(precond=0; precond<3; precond++)
+		{
+			switch(precond)
+			{
+				case 0: 
+					strcat(printOut,"no precond /t|/t"); 
+					break;
+				case 1: 
+					strcat(printOut,"diagonal precond /t|/t"); 
+					cusp::precond::diagonal<int, float, cusp::device_memory> M(A); 
+					break;
+				case 2: 
+					strcat(printOut,"smooth_agg precond /t|/t"); 
+					cusp::precond::smoothed_aggregation<int, float, cusp::device_memory> M(A); 
+					break;
+			}
+			switch(method)
+			{
+				case 0:
+					strcat(printOut,"GMRES-Method"); 
+					cusp::krylov::gmres(A, x, b, monitor, M); 
+				break;
+				case 1:
+					strcat(printOut,"CG-Method");
+					cusp::krylov::cg(A, x, b, monitor, M);
+				break;
+				case 2:
+					strcat(printOut,"BiCG-Method");
+					cusp::krylov::bicg(A, x, b, monitor, M);
+				break;
+			}
+		}
+	}
+	cusp::precond::smoothed_aggregation<int, float, cusp::device_memory> M(A);
 	// Solve 
-
+	 
+	
 	// Look at errors
 	float L2_error, L2_1 = 0.0f, L2_2 = 0.0f;
 	for (int j=1; j<N-1; j++)
@@ -79,6 +120,5 @@ int main()
 	}
 
 	L2_error = sqrt(L2_1/L2_2);
-
 	std::cout<<L2_error<<std::endl;
 }
