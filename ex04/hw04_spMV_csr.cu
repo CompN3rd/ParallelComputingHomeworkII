@@ -12,6 +12,17 @@
 __global__ void csr_matvec(float *elem, int *row_off, int *col, float *b, float *c, int N_side)
 {
 	// Write your kernel here!
+	float temp=0;
+	int row;
+	
+	int cInd 	= threadIdx.x + blockIdx.x * BSZ;
+	int rowEnd 	= row_off[cInd+1];
+	
+	for(row=row_off[cInd]; row < rowEnd; row++)
+	{
+		temp += elem[row] * b[col[row]]; 
+	}
+	c[cInd]=temp;
 }
 
 
@@ -41,7 +52,7 @@ int main()
 
 	int dimGrid (int((N_side-0.5)/BSZ) + 1);
 	int dimBlock (BSZ);
-
+	
 	csr_matvec <<<dimGrid, dimBlock>>> (elements, rows_off, columns, b_d, c_d, N_side);
 
 	cusp::array1d<float, cusp::device_memory> c(c_ptr, c_ptr+N_side);	

@@ -12,7 +12,16 @@
 
 __global__ void ell_matvec(float *elem, int *col, float *b, float *c, int num_entries, int N_side)
 {
-	// write your kernel here!	
+	// write your kernel here!
+	int cInd 	= threadIdx.x + blockIdx.x * BSZ;
+	float temp=0;
+	
+	int index;
+	for(index=0; index<num_entries; index++)
+	{
+		temp += elem[cInd*num_entries+index]* b[col[cInd*num_entries+index]];
+	}
+	c[cInd] = temp;
 }
 
 
