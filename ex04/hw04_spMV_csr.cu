@@ -58,7 +58,10 @@ int main()
 	cusp::array1d<float, cusp::device_memory> c(c_ptr, c_ptr+N_side);	
 
 	cusp::print(c);
-
+	
+	cusp::array1d <float, cusp::device_memory> y(N_side);
+	cusp::multiply(A, b, y);
+	cusp::print(y);
 	return 0;
 
 }

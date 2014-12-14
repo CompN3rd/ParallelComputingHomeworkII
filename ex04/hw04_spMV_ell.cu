@@ -19,7 +19,7 @@ __global__ void ell_matvec(float *elem, int *col, float *b, float *c, int num_en
 	int index;
 	for(index=0; index<num_entries; index++)
 	{
-		temp += elem[cInd*num_entries+index]* b[col[cInd*num_entries+index]];
+		temp += elem[cInd+ index*N_side]* b[col[cInd+index*N_side]];
 	}
 	c[cInd] = temp;
 }
@@ -69,6 +69,10 @@ int main()
 	cusp::array1d<float, cusp::device_memory> c(c_ptr, c_ptr+N_side);
 
 	cusp::print(c);
+	
+	cusp::array1d <float, cusp::device_memory> y(N_side);
+	cusp::multiply(A, b, y);
+	cusp::print(y);
 
 	return 0;
 
