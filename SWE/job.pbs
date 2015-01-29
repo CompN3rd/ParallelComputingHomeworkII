@@ -1,0 +1,17 @@
+#PBS -S /bin/bash
+#PBS -N cuda
+#PBS -o /home/tgrahs/SWE/SWE.out
+#PBS -e /home/tgrahs/SWE/SWE.err
+#PBS -l nodes=2:ppn=1
+#PBS -l walltime=20:00:00
+#PBS -l mem=4096mb
+
+#module add cuda-2.3
+#module add ompi-1.4.1-intel11
+
+export PATH=$PATH:/usr/local/cuda/bin
+export LD_LIBRARY_PATH=:/usr/local/cuda/lib64
+
+hostname
+./SWE/swe_cuda
+
