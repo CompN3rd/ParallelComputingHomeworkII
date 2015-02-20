@@ -25,3 +25,12 @@
 # Executables
 *.exe
 *.app
+
+# Visual Studio
+*.tlog
+*.cu.cache
+*.cu.deps
+*.lastbuildstate
+*.opensdf
+*.pdb
+*.log
