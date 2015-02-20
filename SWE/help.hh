@@ -5,6 +5,8 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
 
 /**
  * class Float2D is a very basic helper class to deal with 2D float arrays:

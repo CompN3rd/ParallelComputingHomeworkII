@@ -3,7 +3,11 @@
 #include "SWE_Block.hh"
 #include <sstream>
 #include <time.h>
-#include <sys/time.h>
+#ifndef _WIN32
+	#include <sys/time.h>
+#else
+	#include <Windows.h>
+#endif
 
 /* if macro SPLASH is defined, the "splashing pool" is used as scenario
    -> unset to switch to scenario "radial breaking dam"

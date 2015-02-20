@@ -1,0 +1,50 @@
+﻿Der Buildvorgang wurde am 20.02.2015 16:24:18 gestartet.
+     1>Projekt "C:\Users\Klaus\Documents\GitHub\ParallelComputingHomeworkII\VS Projects\SWE\SWE\SWE.vcxproj" auf Knoten "2", Build Ziel(e).
+     1>AddCudaCompileDeps:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\cl.exe /E /nologo /showIncludes /TP /D__CUDACC__ /DWIN32 /DWIN64 /DNDEBUG /D_CONSOLE /D_MBCS /I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\include" /I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\bin" /I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\include" /I. /FIcuda_runtime.h /c C:\Users\Klaus\Documents\GitHub\ParallelComputingHomeworkII\SWE\swe.cu 
+       AddCudaCompileDeps:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\cl.exe /E /nologo /showIncludes /TP /D__CUDACC__ /DWIN32 /DWIN64 /DNDEBUG /D_CONSOLE /D_MBCS /I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\include" /I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\bin" /I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\include" /I. /FIcuda_runtime.h /c C:\Users\Klaus\Documents\GitHub\ParallelComputingHomeworkII\SWE\SWE_Block.cu 
+       CudaBuild:
+         Compiling CUDA source file ..\..\..\SWE\swe.cu...
+         cmd.exe /C "C:\Users\Klaus\AppData\Local\Temp\tmp35eeb59d24eb4d09bae28ed059ef8de5.cmd"
+         "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\bin\nvcc.exe" -gencode=arch=compute_20,code=\"sm_20,compute_20\" --use-local-env --cl-version 2013 -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -DWIN32 -DWIN64 -DNDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /Zi  /MD  " -o x64\Release\swe.cu.obj "C:\Users\Klaus\Documents\GitHub\ParallelComputingHomeworkII\SWE\swe.cu"
+         
+         C:\Users\Klaus\Documents\GitHub\ParallelComputingHomeworkII\VS Projects\SWE\SWE>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\bin\nvcc.exe" -gencode=arch=compute_20,code=\"sm_20,compute_20\" --use-local-env --cl-version 2013 -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -DWIN32 -DWIN64 -DNDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /Zi  /MD  " -o x64\Release\swe.cu.obj "C:\Users\Klaus\Documents\GitHub\ParallelComputingHomeworkII\SWE\swe.cu" 
+         swe.cu
+     1>C:/Users/Klaus/Documents/GitHub/ParallelComputingHomeworkII/SWE/swe.cu(41): warning C4244: 'return': Konvertierung von 'double' in 'float', möglicher Datenverlust
+     1>C:/Users/Klaus/Documents/GitHub/ParallelComputingHomeworkII/SWE/swe.cu(49): warning C4244: 'return': Konvertierung von 'double' in 'float', möglicher Datenverlust
+     1>C:/Users/Klaus/Documents/GitHub/ParallelComputingHomeworkII/SWE/swe.cu(64): warning C4305: 'Argument': Verkürzung von 'double' in 'float'
+     1>C:/Users/Klaus/Documents/GitHub/ParallelComputingHomeworkII/SWE/swe.cu(77): warning C4305: 'Initialisierung': Verkürzung von 'double' in 'float'
+     1>C:/Users/Klaus/Documents/GitHub/ParallelComputingHomeworkII/SWE/swe.cu(92): warning C4244: 'Argument': Konvertierung von 'double' in 'float', möglicher Datenverlust
+       CudaBuild:
+         Compiling CUDA source file ..\..\..\SWE\SWE_Block.cu...
+         cmd.exe /C "C:\Users\Klaus\AppData\Local\Temp\tmpea9094e932834ba791b539f8c0cd6f1c.cmd"
+         "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\bin\nvcc.exe" -gencode=arch=compute_20,code=\"sm_20,compute_20\" --use-local-env --cl-version 2013 -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -DWIN32 -DWIN64 -DNDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /Zi  /MD  " -o x64\Release\SWE_Block.cu.obj "C:\Users\Klaus\Documents\GitHub\ParallelComputingHomeworkII\SWE\SWE_Block.cu"
+         
+         C:\Users\Klaus\Documents\GitHub\ParallelComputingHomeworkII\VS Projects\SWE\SWE>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\bin\nvcc.exe" -gencode=arch=compute_20,code=\"sm_20,compute_20\" --use-local-env --cl-version 2013 -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -DWIN32 -DWIN64 -DNDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /Zi  /MD  " -o x64\Release\SWE_Block.cu.obj "C:\Users\Klaus\Documents\GitHub\ParallelComputingHomeworkII\SWE\SWE_Block.cu" 
+         SWE_Block.cu
+     1>C:/Users/Klaus/Documents/GitHub/ParallelComputingHomeworkII/SWE/SWE_Block.cu(18): warning C4305: 'Initialisierung': Verkürzung von 'double' in 'float'
+     1>C:/Users/Klaus/Documents/GitHub/ParallelComputingHomeworkII/SWE/SWE_Block.cu(19): warning C4305: 'Initialisierung': Verkürzung von 'double' in 'float'
+     1>C:/Users/Klaus/Documents/GitHub/ParallelComputingHomeworkII/SWE/SWE_Block.cu(21): warning C4305: 'Initialisierung': Verkürzung von 'double' in 'float'
+     1>C:/Users/Klaus/Documents/GitHub/ParallelComputingHomeworkII/SWE/SWE_Block.cu(24): warning C4305: 'Initialisierung': Verkürzung von 'double' in 'const float'
+     1>C:/Users/Klaus/Documents/GitHub/ParallelComputingHomeworkII/SWE/SWE_Block.cu(140): warning C4244: 'Argument': Konvertierung von 'double' in 'float', möglicher Datenverlust
+     1>C:/Users/Klaus/Documents/GitHub/ParallelComputingHomeworkII/SWE/SWE_Block.cu(157): warning C4244: 'Argument': Konvertierung von 'double' in 'float', möglicher Datenverlust
+     1>C:/Users/Klaus/Documents/GitHub/ParallelComputingHomeworkII/SWE/SWE_Block.cu(440): warning C4244: 'return': Konvertierung von 'double' in 'float', möglicher Datenverlust
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Klaus\Documents\GitHub\ParallelComputingHomeworkII\VS Projects\SWE\x64\Release\SWE.exe" /NOLOGO /LIBPATH:"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\lib\x64" cudart.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Klaus\Documents\GitHub\ParallelComputingHomeworkII\VS Projects\SWE\x64\Release\SWE.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Klaus\Documents\GitHub\ParallelComputingHomeworkII\VS Projects\SWE\x64\Release\SWE.lib" /MACHINE:X64 x64\Release\swe.cu.obj
+         x64\Release\SWE_Block.cu.obj
+         LINK : /LTCG wurde angegeben, es ist jedoch keine Codegenerierung erforderlich. Entfernen Sie /LTCG aus der Linkbefehlszeile, um die Linkerleistung zu erhöhen.
+         SWE.vcxproj -> C:\Users\Klaus\Documents\GitHub\ParallelComputingHomeworkII\VS Projects\SWE\x64\Release\SWE.exe
+       PostBuildEvent:
+         echo copy "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\bin\cudart*.dll" "C:\Users\Klaus\Documents\GitHub\ParallelComputingHomeworkII\VS Projects\SWE\x64\Release\"
+         copy "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\bin\cudart*.dll" "C:\Users\Klaus\Documents\GitHub\ParallelComputingHomeworkII\VS Projects\SWE\x64\Release\"
+         :VCEnd
+         copy "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\bin\cudart*.dll" "C:\Users\Klaus\Documents\GitHub\ParallelComputingHomeworkII\VS Projects\SWE\x64\Release\"
+         C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\bin\cudart32_65.dll
+         C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\bin\cudart64_65.dll
+                 2 Datei(en) kopiert.
+     1>Die Erstellung des Projekts "C:\Users\Klaus\Documents\GitHub\ParallelComputingHomeworkII\VS Projects\SWE\SWE\SWE.vcxproj" ist abgeschlossen, Build Ziel(e).
+
+Build erfolgreich.
+
+Verstrichene Zeit 00:00:14.16
