@@ -12,7 +12,7 @@
 /* if macro SPLASH is defined, the "splashing pool" is used as scenario
    -> unset to switch to scenario "radial breaking dam"
  */
-// #define SPLASH
+ #define SPLASH
 
 
 /*
@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
   //--- set initial values for simulation:
   splash.setInitValues(&splash_height, 0.0, 0.0);
   // define end of simulated time
-  float endSimulation = 0.1;
+  float endSimulation = 0.2;
   
   //--- set initial values for bathymetry:
   splash.setBathymetry(1.0);
@@ -107,7 +107,7 @@ int main(int argc, char** argv) {
   splash.setBoundaryType(WALL,WALL,WALL,WALL); // walls at all boundaries
 
   // define "checkpoints" for visualisation:
-  int numbChckPts = 1;
+  int numbChckPts = 20;
 
   SWE_Block::initTimestep(0.005/sqrt(9.81*11));
 #endif

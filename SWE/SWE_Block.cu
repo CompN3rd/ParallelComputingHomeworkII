@@ -118,12 +118,17 @@ float SWE_Block::simulate(float tStart, float tEnd) {
  */
 void SWE_Block::setInitValues(float _h, float _u, float _v) {
 
-  for(int i=1; i<=nx; i++)
-    for(int j=1; j<=ny; j++) {
-      h[i][j] = _h;
-      hu[i][j] = _h * _u;
-      hv[i][j] = _h * _v; 
-    };
+  //for(int i=1; i<=nx; i++)
+  //  for(int j=1; j<=ny; j++) {
+	for (int i = 0; i <= nx + 1; i++)
+	{
+		for (int j = 0; j <= ny + 1; j++) 
+		{
+			h[i][j] = _h;
+			hu[i][j] = _h * _u;
+			hv[i][j] = _h * _v;
+		}
+	}
 
   cudaLoadUnknowns();
 }
@@ -135,12 +140,17 @@ void SWE_Block::setInitValues(float _h, float _u, float _v) {
  */
 void SWE_Block::setInitValues(float (*_h)(float, float), float _u, float _v) {
 
-  for(int i=1; i<=nx; i++)
-    for(int j=1; j<=ny; j++) {
-      h[i][j] =  _h((i-0.5)*dx,(j-0.5)*dy);
-      hu[i][j] = _u * h[i][j];
-      hv[i][j] = _v * h[i][j]; 
-    };
+  //for(int i=1; i<=nx; i++)
+  //  for(int j=1; j<=ny; j++) {
+	for (int i = 0; i <= nx + 1; i++)
+	{
+		for (int j = 0; j <= ny + 1; j++) 
+		{
+			h[i][j] = _h((i - 0.5)*dx, (j - 0.5)*dy);
+			hu[i][j] = _u * h[i][j];
+			hv[i][j] = _v * h[i][j];
+		}
+	}
 
   cudaLoadUnknowns();
 }
@@ -352,6 +362,9 @@ float SWE_Block::getMaxTimestep() {
       if (fabs(hv[i][j])> vmax) vmax = fabs(hv[i][j]);
     };
 
+  cout << "hmax " << hmax << endl << flush;
+  cout << "vmax " << vmax << endl << flush;
+
   // sqrt(g*hmax) + vmax is the velocity of a characteristic shallow-water wave
   // such that a wave must not propagate farther than dx in a single time step
   return meshSize/(sqrt(g*hmax) + vmax);
@@ -392,35 +405,36 @@ void kernelEulerTimestep(float* hd, float* hud, float* hvd,
 __host__ 
 float SWE_Block::eulerTimestep() 
 {
-  float pes = 0.5; // pessimistic factor to decrease time step size
-  
-  //combute the fluxes on the device
-  computeFluxes();
-  
-  //TODO set up the cuda dimBlock and dimGrid with the appropriate sizes
+	float pes = 0.5; // pessimistic factor to decrease time step size
+
+	//combute the fluxes on the device
+	computeFluxes();
+
+	//TODO set up the cuda dimBlock and dimGrid with the appropriate sizes
 
 
-   dim3 dimBlock(TILE_SIZE,TILE_SIZE);
-   dim3 dimGrid((nx-1)/TILE_SIZE+1,(ny-1)/TILE_SIZE+1);
+	dim3 dimBlock(TILE_SIZE, TILE_SIZE);
+	dim3 dimGrid((nx - 1) / TILE_SIZE + 1, (ny - 1) / TILE_SIZE + 1);
 
-cout << "Call kernel for Euler timestep " << flush << endl;
-  //call the kernel for the computation of a Eulertimestep
-  kernelEulerTimestep<<<dimGrid,dimBlock>>>(hd,hud,hvd,
-                                            Fhd,Fhud,Fhvd,Ghd,Ghud,Ghvd,
-                              					    Bxd,Byd,
-                              					    nx,ny,pes*dt,1.0f/dx,1.0f/dy);
-					    
-//Original c-code
-/*
-    for(int i=1; i<=nx; i++)
-    for(int j=1; j<=ny; j++) {
-      h[i][j] -= pes*dt *( (Fh[i][j]-Fh[i-1][j])/dx + (Gh[i][j]-Gh[i][j-1])/dy );
-      u[i][j] -= pes*dt *( (Fu[i][j]-Fu[i-1][j])/dx + (Gu[i][j]-Gu[i][j-1])/dy );
-      v[i][j] -= pes*dt *( (Fv[i][j]-Fv[i-1][j])/dx + (Gv[i][j]-Gv[i][j-1])/dy );
-    };
- */
+	cout << "Call kernel for Euler timestep " << flush << endl;
 
-  return pes*dt;
+	//call the kernel for the computation of a Eulertimestep
+	kernelEulerTimestep <<< dimGrid, dimBlock >>> (hd, hud, hvd,
+		Fhd, Fhud, Fhvd, Ghd, Ghud, Ghvd,
+		Bxd, Byd,
+		nx, ny, pes*dt, 1.0f / dx, 1.0f / dy);
+
+	//Original c-code
+	/*
+		for(int i=1; i<=nx; i++)
+		for(int j=1; j<=ny; j++) {
+		h[i][j] -= pes*dt *( (Fh[i][j]-Fh[i-1][j])/dx + (Gh[i][j]-Gh[i][j-1])/dy );
+		u[i][j] -= pes*dt *( (Fu[i][j]-Fu[i-1][j])/dx + (Gu[i][j]-Gu[i][j-1])/dy );
+		v[i][j] -= pes*dt *( (Fv[i][j]-Fv[i-1][j])/dx + (Gv[i][j]-Gv[i][j-1])/dy );
+		};
+		*/
+
+	return pes*dt;
 }
 
 /**
@@ -568,8 +582,8 @@ void SWE_Block::computeFluxes() {
    cout << "Call kernel to compute F-fluxes " << flush << endl;
 //TODO set up grids and blocks for the computation of the fluxes. Be aware, that n+1 edges have to be computed, thus the computation has to be divided into a kernel which acts on n data and another one which only acts on a single edge
 
-   dim3 dimBlock1(1,TILE_SIZE);
-   dim3 dimBlock2(TILE_SIZE,TILE_SIZE);
+   dim3 dimBlock1(TILE_SIZE,TILE_SIZE);
+   dim3 dimBlock2(1,TILE_SIZE);
    //dim3 dimGrid(nx/TILE_SIZE+1,(ny-1)/TILE_SIZE+1);
    dim3 dimGrid1(nx/TILE_SIZE,ny/TILE_SIZE);
    dim3 dimGrid2(1,ny/TILE_SIZE);
