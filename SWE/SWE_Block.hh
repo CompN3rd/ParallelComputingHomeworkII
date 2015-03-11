@@ -7,7 +7,6 @@
 
 #include "help.hh"
 
-
 using namespace std;
 
 // number of blocks for multiple-block-version of the code

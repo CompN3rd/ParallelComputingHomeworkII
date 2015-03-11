@@ -384,8 +384,8 @@ void kernelEulerTimestep(float* hd, float* hud, float* hvd,
 // TODO implement that kernel
 // it should compute the new values of hd, hud and hvd
 
-     int i= blockIdx.x*blockDim.x+threadIdx.x+1;
-   int j= blockIdx.y*blockDim.y+threadIdx.y+1;
+	int i = blockIdx.x*blockDim.x + threadIdx.x + 1;
+	int j = blockIdx.y*blockDim.y + threadIdx.y + 1;
 
    if (i>0 && i<=nx && j>0 && j<=ny)
    {

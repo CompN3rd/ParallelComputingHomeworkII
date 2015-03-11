@@ -156,11 +156,8 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
-<<<<<<< HEAD
-      <CodeGeneration>compute_20,sm_20</CodeGeneration>
-=======
-      <CodeGeneration>compute_30,sm_30</CodeGeneration>
->>>>>>> e0f8745a7d7440e10d628c0785121ec7bf33d7e7
+      <CodeGeneration>compute_35,sm_35</CodeGeneration>
+      <GenerateLineInfo>true</GenerateLineInfo>
     </CudaCompile>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

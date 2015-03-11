@@ -160,6 +160,9 @@ int main(int argc, char** argv) {
 
   timer2 = time(NULL);
   printf("Execution time: %f sec. %f (CPU sec) \n",(float)(timer2-timer1),cpu_time);
+
+  //for profiling
+  cudaDeviceReset();
   
   return 0;
 }
