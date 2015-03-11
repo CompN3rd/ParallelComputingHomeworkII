@@ -5,10 +5,11 @@ __device__ __host__ LeafElem::LeafElem()
 	value = 0.0f;
 }
 
-__device__ __host__ BranchElem::BranchElem(int nx, int ny)
+__device__ __host__ BranchElem::BranchElem(int nx, int ny, int recursionsLeft)
 {
 	this->nx = nx;
 	this->ny = ny;
+	this->recursionsLeft = recursionsLeft;
 
 	children = (TreeElem**)malloc(nx * ny * sizeof(TreeElem**));
 	for (int i = 0; i < nx * ny; i++)
@@ -30,7 +31,7 @@ __device__ __host__ BranchElem::~BranchElem()
 	free(children);
 }
 
-__device__ __host__ SWEHandler::SWEHandler(int nx, int ny)
+__device__ __host__ SWEHandler::SWEHandler(int nx, int ny, int maxRecursions)
 {
 }
 
@@ -57,7 +58,7 @@ __global__ void setFather(float* values, int nx, int ny)
 	dim3 grid(nx, ny);
 
 	//tree
-	BranchElem* hd = new BranchElem(16, 16);
+	BranchElem* hd = new BranchElem(16, 16, 1);
 
 	for (int i = 0; i < nx * ny; i++)
 	{

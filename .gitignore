@@ -34,3 +34,5 @@
 *.opensdf
 *.pdb
 *.log
+*.suo
+*.sdf

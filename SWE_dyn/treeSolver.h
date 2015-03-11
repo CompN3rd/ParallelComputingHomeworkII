@@ -28,9 +28,10 @@ class BranchElem : TreeElem
 public:
 	int nx;
 	int ny;
+	int recursionsLeft;
 	TreeElem** children;
 
-	__device__ __host__ BranchElem(int nx, int ny);
+	__device__ __host__ BranchElem(int nx, int ny, int recursionsLeft);
 	__device__ __host__ ~BranchElem();
 
 	virtual __device__ __host__ bool isLeaf()
