@@ -1,5 +1,8 @@
+#pragma once
+
 #include <cstdlib>
 #include <iostream>
+#include <math.h>
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 
@@ -23,15 +26,15 @@ public:
 	}
 };
 
-class BranchElem : TreeElem
+class BranchElem : public TreeElem
 {
 public:
 	int nx;
 	int ny;
-	int recursionsLeft;
+	int depth;
 	TreeElem** children;
 
-	__device__ __host__ BranchElem(int nx, int ny, int recursionsLeft);
+	__device__ __host__ BranchElem(int nx, int ny, int depth);
 	__device__ __host__ ~BranchElem();
 
 	virtual __device__ __host__ bool isLeaf()
@@ -44,21 +47,25 @@ public:
 class SWEHandler
 {
 public:
-	//Coarsest grids for 
-	TreeElem** hd;
-	TreeElem** hud;
-	TreeElem** hvd;
+	//resolution of full grid
+	int nx;
+	int ny;
 
-	TreeElem** Fhd;
-	TreeElem** Fhud;
-	TreeElem** Fhvd;
-	TreeElem** Ghd;
-	TreeElem** Ghud;
-	TreeElem** Ghvd;
+	//Coarsest grids for 
+	TreeElem* hd;
+	TreeElem* hud;
+	TreeElem* hvd;
+
+	TreeElem* Fhd;
+	TreeElem* Fhud;
+	TreeElem* Fhvd;
+	TreeElem* Ghd;
+	TreeElem* Ghud;
+	TreeElem* Ghvd;
 
 	// arrays to hold the bathymetry source terms for the hu and hv equations
-	TreeElem** Bxd;
-	TreeElem** Byd;
+	TreeElem* Bxd;
+	TreeElem* Byd;
 
 	// helper arrays: store maximum height and velocities to determine time step
 	float* maxhd;
@@ -66,4 +73,5 @@ public:
 	float* maxhvd;
 
 	__device__ __host__ SWEHandler(int nx, int ny, int maxRecursions);
+	__device__ __host__ ~SWEHandler();
 };

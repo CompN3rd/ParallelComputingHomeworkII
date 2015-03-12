@@ -19,10 +19,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <CudaCompile Include="..\..\treeOperations.cu" />
     <CudaCompile Include="..\..\treeSolver.cu" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\treeOperations.h" />
     <ClInclude Include="..\..\treeSolver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Tests.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{DBFDADFD-F7E7-47E7-8CBD-95AD19D927D6}</ProjectGuid>
