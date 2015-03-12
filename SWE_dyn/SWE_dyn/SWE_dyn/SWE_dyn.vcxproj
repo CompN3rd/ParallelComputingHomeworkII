@@ -19,15 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <CudaCompile Include="..\..\Tests.cu" />
     <CudaCompile Include="..\..\treeOperations.cu" />
     <CudaCompile Include="..\..\treeSolver.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\treeOperations.h" />
     <ClInclude Include="..\..\treeSolver.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\Tests.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{DBFDADFD-F7E7-47E7-8CBD-95AD19D927D6}</ProjectGuid>
@@ -82,6 +80,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>C:\ProgramData\NVIDIA Corporation\CUDA Samples\v6.5\common\inc;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

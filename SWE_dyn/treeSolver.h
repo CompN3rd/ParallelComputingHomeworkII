@@ -5,12 +5,15 @@
 #include <math.h>
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
+#include <device_functions.h>
+#include <helper_cuda.h>
 
 //gpu tree
 class TreeElem 
 {
 public:
 	virtual __device__ __host__ bool isLeaf() = 0;
+	virtual __device__ __host__ ~TreeElem(){};
 };
 
 class LeafElem : public TreeElem
@@ -19,6 +22,7 @@ public:
 	float value;
 
 	__device__ __host__ LeafElem();
+	virtual __device__ __host__ ~LeafElem(){};
 
 	virtual __device__ __host__ bool isLeaf()
 	{
@@ -35,7 +39,7 @@ public:
 	TreeElem** children;
 
 	__device__ __host__ BranchElem(int nx, int ny, int depth);
-	__device__ __host__ ~BranchElem();
+	virtual __device__ __host__ ~BranchElem();
 
 	virtual __device__ __host__ bool isLeaf()
 	{
@@ -66,11 +70,6 @@ public:
 	// arrays to hold the bathymetry source terms for the hu and hv equations
 	TreeElem* Bxd;
 	TreeElem* Byd;
-
-	// helper arrays: store maximum height and velocities to determine time step
-	float* maxhd;
-	float* maxhud;
-	float* maxhvd;
 
 	__device__ __host__ SWEHandler(int nx, int ny, int maxRecursions);
 	__device__ __host__ ~SWEHandler();

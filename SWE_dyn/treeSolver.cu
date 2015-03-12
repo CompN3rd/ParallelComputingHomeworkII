@@ -12,24 +12,20 @@ __device__ __host__ BranchElem::BranchElem(int nx, int ny, int depth)
 	this->ny = ny;
 	this->depth = depth;
 
-	children = (TreeElem**)malloc(nx * ny * sizeof(TreeElem**));
-	for (int i = 0; i < nx * ny; i++)
-	{
-		children[i] = new LeafElem();
-	}
+	children = new TreeElem*[nx * ny];
+	//for (int i = 0; i < nx * ny; i++)
+	//{
+	//	children[i] = NULL;
+	//}
 }
 
 __device__ __host__ BranchElem::~BranchElem()
 {
-	for (int i = 0; i < nx * ny; i++)
-	{
-		if (children[i] != NULL)
-		{
-			delete children[i];
-		}
-	}
+	dim3 grid(1);
+	dim3 block(nx * ny);
+	deleteChildren << <grid, block >> >(children);
 
-	free(children);
+	delete[] children;
 }
 
 __device__ __host__ SWEHandler::SWEHandler(int nx, int ny, int maxRecursions)
@@ -37,11 +33,8 @@ __device__ __host__ SWEHandler::SWEHandler(int nx, int ny, int maxRecursions)
 	this->nx = nx;
 	this->ny = ny;
 
-	dim3 block(1);
-	dim3 grid(1);
-
 	//create full tree
-	createFullTree_Root << <grid, block >> >(&hd, nx, ny, 2);
+	createFullTree(&hd, nx, ny, 2);
 }
 
 __device__ __host__ SWEHandler::~SWEHandler()
