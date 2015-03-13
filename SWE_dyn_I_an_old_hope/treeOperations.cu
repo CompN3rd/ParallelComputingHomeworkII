@@ -16,7 +16,7 @@ __global__ void deleteChildren(TreeElem** children)
 		dim3 numBlocks(1);
 		dim3 numThreads(r->nx * r->ny);
 		deleteChildren << <numBlocks, numThreads >> >(r->children);
-		//cudaDeviceSynchronize();
+		cudaDeviceSynchronize();
 	}
 }
 
@@ -34,7 +34,7 @@ __global__ void createFullTree_Child(TreeElem** children, int base, int depth, i
 		dim3 numThreads(base * base);
 
 		createFullTree_Child << <numBlocks, numThreads >> >(((BranchElem*)children[i])->children, base, depth + 1, maxRecursions);
-		//cudaDeviceSynchronize();
+		cudaDeviceSynchronize();
 	}
 	else
 	{
@@ -62,7 +62,7 @@ __device__ __host__ void createFullTree(TreeElem** root, int nx, int ny, int bas
 		dim3 numThreads(base * base);
 
 		createFullTree_Child << <numBlocks, numThreads >> >(r->children, base, 1, maxRecursions);
-		//cudaDeviceSynchronize();
+		cudaDeviceSynchronize();
 	}
 }
 //------------------------------------------------
@@ -87,7 +87,7 @@ __global__ void countLeaves_Child(TreeElem** children, int* nc)
 		dim3 numThreads(numChildren);
 
 		countLeaves_Child << <numBlocks, numThreads >> >(c->children, ncNew);
-		//cudaDeviceSynchronize();
+		cudaDeviceSynchronize();
 
 		nc[i] = 0;
 		for (int j = 0; j < c->nx * c->ny; j++)
@@ -116,7 +116,7 @@ __device__ __host__ int countLeaves(TreeElem* root)
 		dim3 numThreads(numChildren);
 
 		countLeaves_Child << <numBlocks, numThreads >> >(r->children, nc);
-		//cudaDeviceSynchronize();
+		cudaDeviceSynchronize();
 
 		int res = 0;
 		for (int i = 0; i < r->nx * r->ny; i++)

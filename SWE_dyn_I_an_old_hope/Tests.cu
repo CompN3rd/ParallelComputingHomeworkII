@@ -1,11 +1,11 @@
 #include "treeOperations.h"
 
-#define SUBDIV 4
-#define THREADS 4
+#define SUBDIV 2
+#define THREADS 128
 
 __global__ void testCase(int nx, int ny, int* res)
 {
-	int i = threadIdx.x;
+	int i = threadIdx.x + blockIdx.x * blockDim.x;
 	TreeElem* gpuTree;
 	createFullTree(&gpuTree, nx, ny, SUBDIV);
 	cudaDeviceSynchronize();
@@ -28,6 +28,18 @@ int main(int argc, char** argv)
 		nx = (int)atoi(argv[1]);
 		ny = (int)atoi(argv[2]);
 	}
+
+	cudaDeviceSetLimit(cudaLimitDevRuntimeSyncDepth, 5);
+	cudaDeviceSetLimit(cudaLimitDevRuntimePendingLaunchCount, 32768);
+
+	size_t lim;
+	cudaDeviceGetLimit(&lim, cudaLimitDevRuntimeSyncDepth);
+	std::cout << "rsd: " << lim << std::endl;
+
+	lim;
+	cudaDeviceGetLimit(&lim, cudaLimitDevRuntimePendingLaunchCount);
+	std::cout << "plc: " << lim << std::endl;
+
 	std::cout << "nx: " << nx << " ny: " << ny << std::endl;
 	std::cout << "numThreadsX: " << THREADS << " numThreadsY: " << THREADS << std::endl;
 
@@ -35,7 +47,9 @@ int main(int argc, char** argv)
 	int* res_d;
 	checkCudaErrors(cudaMalloc(&res_d, THREADS * THREADS * sizeof(int)));
 
-	testCase << <1, THREADS * THREADS >> >(nx, ny, res_d);
+	dim3 block(16 * 16);
+	dim3 grid(THREADS * THREADS / (16 * 16));
+	testCase << <grid, block>> >(nx, ny, res_d);
 	checkCudaErrors(cudaGetLastError());
 
 	checkCudaErrors(cudaMemcpy(res, res_d, THREADS * THREADS * sizeof(int), cudaMemcpyDeviceToHost));
