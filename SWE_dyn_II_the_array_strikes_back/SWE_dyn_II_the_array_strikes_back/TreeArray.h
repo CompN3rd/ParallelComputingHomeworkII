@@ -2,6 +2,7 @@
 #include <device_functions.h>
 #include <device_launch_parameters.h>
 #include <helper_cuda.h>
+#include <math.h>
 
 class Managed
 {

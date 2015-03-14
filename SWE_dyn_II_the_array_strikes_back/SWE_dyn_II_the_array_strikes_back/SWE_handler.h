@@ -15,6 +15,12 @@ private:
 	int maxRecursions;
 	int refinementBaseX;
 	int refinementBaseY;
+	//derived from that
+	int numThreadsX;
+	int numThreadsY;
+
+	dim3 blockSize;
+	dim3 gridSize;
 
 	//solution
 	TreeArray* h;
@@ -37,6 +43,6 @@ private:
 	TreeArray* Bv;
 
 public:
-	SWE_handler(int x, int y, float dx, float dy, float g, int refinementBaseX, int refinementBaseY, int maxRecursions);
+	SWE_handler(int nx, int ny, float dx, float dy, float g, int refinementBaseX = 2, int refinementBaseY = 2, int maxRecursions = 2, int blockSizeX = 16, int blockSizeY = 16);
 	~SWE_handler();
 };

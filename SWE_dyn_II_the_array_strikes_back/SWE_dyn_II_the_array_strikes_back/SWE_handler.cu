@@ -1,9 +1,9 @@
 #include "SWE_handler.h"
 
-SWE_handler::SWE_handler(int x, int y, float dx, float dy, float g, int rBX, int rBY, int mR)
+SWE_handler::SWE_handler(int x, int y, float dx, float dy, float g, int rBX, int rBY, int mR, int bSX, int bSY)
 {
-	nx = x;
-	ny = y;
+	this->nx = x;
+	this->ny = y;
 
 	this->dx = dx;
 	this->dy = dy;
@@ -13,6 +13,12 @@ SWE_handler::SWE_handler(int x, int y, float dx, float dy, float g, int rBX, int
 	this->refinementBaseX = rBX;
 	this->refinementBaseY = rBY;
 	this->maxRecursions = mR;
+
+	this->numThreadsX = divUp(this->nx, (unsigned int)pow(refinementBaseX, mR));
+	this->numThreadsY = divUp(this->ny, (unsigned int)pow(refinementBaseY, mR));
+
+	this->blockSize = dim3(bSX, bSY);
+	this->gridSize = dim3(divUp(this->numThreadsX, this->blockSize.x), divUp(this->numThreadsY, this->blockSize.y));
 
 	//create managed arrays for grids
 	h = new TreeArray(nx + 2, ny + 2);

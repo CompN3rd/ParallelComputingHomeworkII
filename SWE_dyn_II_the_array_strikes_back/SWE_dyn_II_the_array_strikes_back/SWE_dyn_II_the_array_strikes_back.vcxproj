@@ -27,7 +27,6 @@
     <CudaCompile Include="EntryPoint.cu" />
     <CudaCompile Include="SWE_handler.cu" />
     <CudaCompile Include="TreeArray.cu" />
-    <CudaCompile Include="Utility.cu" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{D8AC345E-DE0A-4ECA-AF52-FB241DDDB147}</ProjectGuid>
