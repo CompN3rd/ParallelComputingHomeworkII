@@ -25,6 +25,7 @@
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="EntryPoint.cu" />
+    <CudaCompile Include="SWE_handler.cu" />
     <CudaCompile Include="TreeArray.cu" />
     <CudaCompile Include="Utility.cu" />
   </ItemGroup>
