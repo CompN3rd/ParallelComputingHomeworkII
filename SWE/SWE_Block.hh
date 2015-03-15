@@ -142,6 +142,4 @@ class SWE_Block {
 
 ostream& operator<< (ostream& os, const SWE_Block& swe);
 
-
-
 #endif

@@ -19,12 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Kernels.h" />
     <ClInclude Include="SWE_handler.h" />
     <ClInclude Include="TreeArray.h" />
     <ClInclude Include="Utility.h" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="EntryPoint.cu" />
+    <CudaCompile Include="Kernels.cu" />
     <CudaCompile Include="SWE_handler.cu" />
     <CudaCompile Include="TreeArray.cu" />
   </ItemGroup>

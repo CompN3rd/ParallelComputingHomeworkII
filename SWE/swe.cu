@@ -40,7 +40,6 @@ float splash_height(float x, float y) {
   // return 10+(1.0-y);
   return 100+(1.0-(x+y));
 };
-
 /**
  * function to initialise unknown h (water level):
  * scenario "radial dam break" 
