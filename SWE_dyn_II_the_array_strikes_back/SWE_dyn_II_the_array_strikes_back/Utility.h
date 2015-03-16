@@ -70,3 +70,9 @@ inline __device__ __host__ void computeCellRectangle(const uint2 ext, unsigned i
 	cellExt.x = x + baseLengthX < ext.x ? baseLengthX : 0;
 	cellExt.y = y + baseLengthY < ext.y ? baseLengthY : 0;
 }
+
+// local Lax-Friedrich
+inline __device__ float computeFlux(float fLow, float fHigh, float xiLow, float xiHigh, float llf) 
+{
+	return 0.5f*(fLow + fHigh) - 0.5f*llf*(xiHigh - xiLow);
+}

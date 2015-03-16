@@ -165,6 +165,91 @@ __global__ void computeBathymetrySources_kernel(TreeArray* h, TreeArray* b, Tree
 }
 
 //--------------------------------
+//fluxes
+
+__global__ void computeFluxesF_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv, TreeArray* Fh, TreeArray* Fhu, TreeArray* Fhv, float g)
+{
+	int idxX = threadIdx.x + blockIdx.x * blockDim.x;
+	int idxY = threadIdx.y + blockIdx.y * blockDim.y;
+
+	if (idxX >= Fh->getWidth() || idxY >= Fh->getHeight())
+		return;
+
+	int currentIndex = computeIndex(Fh->getWidth(), Fh->getHeight(), idxX, idxY);
+	int currentIndexH = computeIndex(h->getWidth(), h->getHeight(), idxX, idxY);
+	int rightIndexH = computeIndex(h->getWidth(), h->getHeight(), idxX + 1, idxY);
+
+	//compute signal velocities
+	float sv1, sv2, llf;
+	sv1 = fabs(hu->getValues()[currentIndexH] / h->getValues()[currentIndexH]) + sqrtf(g * h->getValues()[currentIndexH]);
+	sv2 = fabs(hu->getValues()[rightIndexH] / h->getValues()[rightIndexH]) + sqrtf(g * h->getValues()[rightIndexH]);
+	llf = max(sv1, sv2);
+
+	//compute fluxes:
+	Fh->getValues()[currentIndex] = computeFlux(
+		h->getValues()[currentIndexH] * hu->getValues()[currentIndexH],
+		h->getValues()[rightIndexH] * hu->getValues()[rightIndexH],
+		h->getValues()[currentIndexH],
+		h->getValues()[rightIndexH],
+		llf);
+
+	Fhu->getValues()[currentIndex] = computeFlux(
+		hu->getValues()[currentIndexH] * hu->getValues()[currentIndexH] + (0.5f * g * h->getValues()[currentIndexH]),
+		hu->getValues()[rightIndexH] * hu->getValues()[rightIndexH] + (0.5f * g * h->getValues()[rightIndexH]),
+		hu->getValues()[currentIndexH],
+		hu->getValues()[rightIndexH],
+		llf);
+
+	Fhv->getValues()[currentIndex] = computeFlux(
+		hu->getValues()[currentIndexH] * hv->getValues()[currentIndexH],
+		hu->getValues()[rightIndexH] * hv->getValues()[rightIndexH],
+		hv->getValues()[currentIndexH],
+		hv->getValues()[rightIndexH],
+		llf);
+}
+
+__global__ void computeFluxesG_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv, TreeArray* Gh, TreeArray* Ghu, TreeArray* Ghv, float g)
+{
+	int idxX = threadIdx.x + blockIdx.x * blockDim.x;
+	int idxY = threadIdx.y + blockIdx.y * blockDim.y;
+
+	if (idxX >= Gh->getWidth() || idxY >= Gh->getHeight())
+		return;
+
+	int currentIndex = computeIndex(Gh->getWidth(), Gh->getHeight(), idxX, idxY);
+	int currentIndexH = computeIndex(h->getWidth(), h->getHeight(), idxX, idxY);
+	int topIndexH = computeIndex(h->getWidth(), h->getHeight(), idxX, idxY + 1);
+
+	//compute signal velocities
+	float sv1, sv2, llf;
+	sv1 = fabs(hv->getValues()[currentIndexH] / h->getValues()[currentIndexH]) + sqrtf(g * h->getValues()[currentIndexH]);
+	sv2 = fabs(hv->getValues()[topIndexH] / h->getValues()[topIndexH]) + sqrtf(g * h->getValues()[topIndexH]);
+	llf = max(sv1, sv2);
+
+	//compute fluxes
+	Gh->getValues()[currentIndex] = computeFlux(
+		h->getValues()[currentIndexH] * hv->getValues()[currentIndexH],
+		h->getValues()[topIndexH] * hv->getValues()[topIndexH],
+		h->getValues()[currentIndexH],
+		h->getValues()[topIndexH],
+		llf);
+
+	Ghu->getValues()[currentIndex] = computeFlux(
+		hu->getValues()[currentIndexH] * hv->getValues()[currentIndexH],
+		hu->getValues()[topIndexH] * hv->getValues()[topIndexH],
+		hu->getValues()[currentIndexH],
+		hu->getValues()[topIndexH],
+		llf);
+
+	Ghv->getValues()[currentIndex] = computeFlux(
+		hv->getValues()[currentIndexH] * hv->getValues()[currentIndexH] + (0.5f * g * h->getValues()[currentIndexH]),
+		hv->getValues()[topIndexH] * hv->getValues()[topIndexH] + (0.5f * g * h->getValues()[topIndexH]),
+		hv->getValues()[currentIndexH],
+		hv->getValues()[topIndexH],
+		llf);
+}
+
+//--------------------------------
 //averaging of values
 __global__ void getAveragedVerticalValue_child_kernel(TreeArray* arr, uint2 globStart, int refinementBase, int myDepth, float* resFather, int* numFather)
 {

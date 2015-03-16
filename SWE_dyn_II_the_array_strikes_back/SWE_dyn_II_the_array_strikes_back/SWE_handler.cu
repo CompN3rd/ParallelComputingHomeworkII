@@ -188,14 +188,19 @@ float SWE_handler::eulerTimestep()
 	computeFluxes();
 
 	//kernel using dynamic parallelism
+	eulerTimestep_kernel();
 
 	return pessimisticFactor * dt;
 }
 
 //-------------------------------------------------
 //fluxes
-
 void SWE_handler::computeFluxes()
 {
+	dim3 blockDim = this->blockSize;
+	dim3 gridDim(divUp(Fh->getWidth(), blockDim.x), divUp(Fh->getHeight(), blockDim.y));
+	computeFluxesF_kernel << <gridDim, blockDim >> >(this->h, this->hu, this->hv, this->Fh, this->Fhu, this->Fhv, this->g);
 
+	gridDim = dim3(divUp(Gh->getWidth(), blockDim.x), divUp(Gh->getHeight(), blockDim.y));
+	computeFluxesG_kernel << <gridDim, blockDim >> >(this->h, this->hu, this->hv, this->Gh, this->Ghu, this->Ghv, this->g);
 }
