@@ -24,9 +24,9 @@ inline __device__ __host__ unsigned int divUp(const unsigned int i, const unsign
 }
 
 template<typename MemoryType>
-__global__ void fillRect(MemoryType* data, const uint2& arrayExtends, MemoryType value, const uint2& pStart, const uint2& rectExt)
+__global__ void fillRect_child(MemoryType* data, const uint2& arrayExtends, MemoryType value, const uint2& pStart, const uint2& rectExt)
 {
-	//assumption gridSize = rect.(width, height)
+	//assumption gridSize = rectExt.(width, height)
 	int xIndex = threadIdx.x + blockIdx.x * blockDim.x;
 	int yIndex = threadIdx.y + blockIdx.y * blockDim.y;
 
@@ -40,6 +40,14 @@ __global__ void fillRect(MemoryType* data, const uint2& arrayExtends, MemoryType
 		return;
 
 	data[computeIndex(arrayExtends.x, arrayExtends.y, x0, y0)] = value;
+}
+
+template<typename MemoryType>
+__device__ void fillRect(MemoryType* data, const uint2& arrayExtends, MemoryType value, const uint2& pStart, const uint2& rectExt)
+{
+	dim3 block(min(rectExt.x, 16), min(rectExt.y, 16));
+	dim3 grid(divUp(rectExt.x, block.x), divUp(rectExt.y, block.y));
+	fillRect_child<MemoryType> << <grid, block >> >(data, arrayExtends, value, pStart, rectExt);
 }
 
 //thread computation

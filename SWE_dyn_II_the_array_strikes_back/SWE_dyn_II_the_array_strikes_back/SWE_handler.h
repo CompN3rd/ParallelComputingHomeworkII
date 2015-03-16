@@ -57,6 +57,10 @@ public:
 	void setBoundaryLayer();
 
 	float simulate(float startTime, float endTime);
+	float eulerTimestep();
+	float getMaxTimestep();
+
+	void computeFluxes();
 
 	inline void setTimestep(float t)
 	{

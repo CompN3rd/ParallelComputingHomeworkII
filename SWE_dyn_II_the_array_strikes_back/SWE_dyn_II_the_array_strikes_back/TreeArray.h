@@ -4,6 +4,7 @@
 #include <helper_cuda.h>
 #include <helper_timer.h>
 #include <math.h>
+#include <helper_math.h>
 
 class Managed
 {

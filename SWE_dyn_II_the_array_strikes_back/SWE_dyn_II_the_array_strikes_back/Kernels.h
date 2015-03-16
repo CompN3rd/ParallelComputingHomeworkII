@@ -7,7 +7,8 @@ __global__ void setRightBorder_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv
 __global__ void setLeftBorder_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv, BoundaryType left);
 
 //computing the bathymetry
-__global__ void computeBathymetry_kernel(TreeArray* h, TreeArray* b, TreeArray* Bu, TreeArray* Bv, float g, int refinementBaseX, int refinementBaseY, int maxRecursions);
+//__global__ void computeHrizontalBathymetryFluxes_kernel(TreeArray* h, TreeArray* b, TreeArray* Bu, float g, int refinementBaseX, int refinementBaseY, int maxRecursions);
+__global__ void computeBathymetrySources_kernel(TreeArray* h, TreeArray* b, TreeArray* Bu, TreeArray* Bv, float g, int maxRecursions);
 
 //averaging of values
 __device__ float getAveragedVerticalValue(TreeArray* arr, uint2 start, int refinementBase, int myDepth);

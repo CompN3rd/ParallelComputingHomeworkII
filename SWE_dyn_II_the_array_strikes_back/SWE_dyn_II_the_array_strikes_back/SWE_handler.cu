@@ -125,10 +125,11 @@ void SWE_handler::setBathymetry(float(*b)(float, float))
 
 void SWE_handler::computeBathymetrySources()
 {
+	//don't use tree refinement here, at least not yet
 	dim3 blockDim = this->blockSize;
-	dim3 gridDim(computeForestBase(nx + 1, refinementBaseX, maxRecursions), computeForestBase(ny + 1, refinementBaseY, maxRecursions));
+	dim3 gridDim(divUp(nx + 1, blockSize.x), divUp(ny + 1, blockSize.y));
 
-	computeBathymetry_kernel << <gridDim, blockDim >> >(this->h, this->b, this->Bu, this->Bv, this->g, this->refinementBaseX, this->refinementBaseY, this->maxRecursions);
+	computeBathymetrySources_kernel << <gridDim, blockDim >> >(this->h, this->b, this->Bu, this->Bv, this->g, this->maxRecursions);
 	checkCudaErrors(cudaGetLastError());
 }
 
@@ -173,7 +174,28 @@ float SWE_handler::simulate(float startTime, float endTime)
 
 		computeBathymetrySources();
 
+		t += eulerTimestep();
+
 	} while (t < endTime);
 
 	return t;
+}
+
+float SWE_handler::eulerTimestep()
+{
+	float pessimisticFactor = 0.5f;
+
+	computeFluxes();
+
+	//kernel using dynamic parallelism
+
+	return pessimisticFactor * dt;
+}
+
+//-------------------------------------------------
+//fluxes
+
+void SWE_handler::computeFluxes()
+{
+
 }
