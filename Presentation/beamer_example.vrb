@@ -1,0 +1,17 @@
+\frametitle{With Pointer}
+\begin{verbatim}
+			class BranchElem : public TreeElem
+			{
+			 public:
+			    int nx;
+			    int ny;
+			    int depth;
+			    TreeElem** children;
+			    __device__ __host__ BranchElem(int nx, int ny, int depth);
+			    virtual __device__ __host__ ~BranchElem();
+			    virtual __device__ __host__ bool isLeaf()
+			    {
+			        return false;
+			    }
+			 };
+	\end{verbatim}

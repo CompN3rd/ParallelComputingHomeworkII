@@ -57,13 +57,15 @@ public:
 	void setBoundaryLayer();
 
 	float simulate(float startTime, float endTime);
+	void computeFluxes();
 	float eulerTimestep();
 	float getMaxTimestep();
-
-	void computeFluxes();
 
 	inline void setTimestep(float t)
 	{
 		this->dt = t;
 	}
+
+	//output
+	void writeVTKFile(std::string filename);
 };

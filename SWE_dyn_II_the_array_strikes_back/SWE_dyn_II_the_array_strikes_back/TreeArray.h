@@ -1,10 +1,14 @@
 #include <cuda_runtime.h>
 #include <device_functions.h>
 #include <device_launch_parameters.h>
+
+#define __DRIVER_TYPES_H__
 #include <helper_cuda.h>
 #include <helper_timer.h>
-#include <math.h>
 #include <helper_math.h>
+#include <iostream>
+#include <stdio.h>
+#include <fstream>
 
 class Managed
 {
@@ -44,21 +48,25 @@ public:
 	//element access
 	inline __device__ __host__ int getWidth()
 	{
+		cudaDeviceSynchronize();
 		return this->nx;
 	}
 
 	inline __device__ __host__ int getHeight()
 	{
+		cudaDeviceSynchronize();
 		return this->ny;
 	}
 
-	inline __device__ __host__ float* const getValues()
+	inline __device__ __host__ float* getValues()
 	{
+		cudaDeviceSynchronize();
 		return this->values;
 	}
 
-	inline __device__ __host__ int* const getDepths()
+	inline __device__ __host__ int* getDepths()
 	{
+		cudaDeviceSynchronize();
 		return this->depths;
 	}
 };

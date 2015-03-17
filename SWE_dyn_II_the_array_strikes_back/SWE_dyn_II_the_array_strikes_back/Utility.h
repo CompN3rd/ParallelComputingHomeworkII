@@ -59,8 +59,8 @@ inline __device__ __host__ unsigned int computeForestBase(unsigned int dimension
 //cell rectangle
 inline __device__ __host__ void computeCellRectangle(const uint2 ext, unsigned int refinementBaseX, unsigned int refinementBaseY, unsigned int refinementHeight, unsigned int idxX, unsigned int idxY, uint2& cellStart, uint2& cellExt)
 {
-	unsigned int baseLengthX = (unsigned int)pow(refinementBaseX, refinementHeight);
-	unsigned int baseLengthY = (unsigned int)pow(refinementBaseY, refinementHeight);
+	unsigned int baseLengthX = (unsigned int)pow((float)refinementBaseX, (float)refinementHeight);
+	unsigned int baseLengthY = (unsigned int)pow((float)refinementBaseY, (float)refinementHeight);
 
 	unsigned int x = min(ext.x, idxX * baseLengthX);
 	unsigned int y = min(ext.y, idxY * baseLengthY);
@@ -76,3 +76,11 @@ inline __device__ float computeFlux(float fLow, float fHigh, float xiLow, float 
 {
 	return 0.5f*(fLow + fHigh) - 0.5f*llf*(xiHigh - xiLow);
 }
+
+// for file output
+inline std::string generateFileName(std::string baseName, int timeStep) {
+
+	std::ostringstream FileName;
+	FileName << baseName << timeStep << ".vtk";
+	return FileName.str();
+};

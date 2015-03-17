@@ -23,6 +23,7 @@ TreeArray::TreeArray(const TreeArray& other)
 
 TreeArray::~TreeArray()
 {
-	cudaFree(values);
-	cudaFree(depths);
+	//crashes???
+	//cudaFree(values);
+	//cudaFree(depths);
 }

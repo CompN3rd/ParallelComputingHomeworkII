@@ -49,7 +49,7 @@ __global__ void setRightBorder_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv
 	if (idx >= h->getHeight())
 		return;
 
-	if (right = CONNECT)
+	if (right == CONNECT)
 	{
 		h->getValues()[computeIndex(h->getWidth(), h->getHeight(), h->getWidth() - 1, idx)] = h->getValues()[computeIndex(h->getWidth(), h->getHeight(), 1, idx)];
 		hu->getValues()[computeIndex(hu->getWidth(), hu->getHeight(), hu->getWidth() - 1, idx)] = hu->getValues()[computeIndex(hu->getWidth(), hu->getHeight(), 1, idx)];
@@ -70,7 +70,7 @@ __global__ void setLeftBorder_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv,
 	if (idx >= h->getHeight())
 		return;
 
-	if (left = CONNECT)
+	if (left == CONNECT)
 	{
 		h->getValues()[computeIndex(h->getWidth(), h->getHeight(), 0, idx)] = h->getValues()[computeIndex(h->getWidth(), h->getHeight(), h->getWidth() - 2, idx)];
 		hu->getValues()[computeIndex(hu->getWidth(), hu->getHeight(), 0, idx)] = hu->getValues()[computeIndex(hu->getWidth(), hu->getHeight(), h->getWidth() - 2, idx)];
@@ -250,51 +250,248 @@ __global__ void computeFluxesG_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv
 }
 
 //--------------------------------
-//averaging of values
-__global__ void getAveragedVerticalValue_child_kernel(TreeArray* arr, uint2 globStart, int refinementBase, int myDepth, float* resFather, int* numFather)
+//euler timestep
+__global__ void eulerTimestep_child_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv,
+	TreeArray* Fh, TreeArray* Fhu, TreeArray* Fhv,
+	TreeArray* Gh, TreeArray* Ghu, TreeArray* Ghv,
+	TreeArray* Bu, TreeArray* Bv,
+	float dt, float dxi, float dyi,
+	int refinementBaseX, int refinementBaseY, int maxRecursions,
+	int depth, uint2 cellStart, uint2 cellExt)
 {
-	int idxY = threadIdx.x + blockIdx.x * blockDim.x;
-	int baseLengthY = (int)pow(refinementBase, maxRecursions - myDepth);
-}
+	int cellOffX = threadIdx.x + blockIdx.x * blockDim.x;
+	int cellOffY = threadIdx.y + blockIdx.y * blockDim.y;
 
-//averaging part of a row / column
-__device__ float getAveragedVerticalValue(TreeArray* arr, uint2 start, int refinementBase, int myDepth)
-{
-	//check depth of start, if refinement is needed
-	if (arr->getDepths()[computeIndex(arr->getWidth(), arr->getHeight(), start.x, start.y)] == myDepth)
+	uint2 hExt = make_uint2(h->getWidth(), h->getHeight());
+	uint2 ccellStart;
+	uint2 ccellExt;
+	computeCellRectangle(cellExt, refinementBaseX, refinementBaseY, maxRecursions - depth, cellOffX, cellOffY, ccellStart, ccellExt);
+
+	if (ccellStart.x >= cellExt.x || ccellStart.y >= cellExt.y)
+		return;
+
+	//modify cellStart to the global grid
+	cellStart += ccellStart;
+	//modify cellExt to the real cell extends
+	cellExt = ccellExt;
+
+	if (depth == maxRecursions)
 	{
-		//no subdivision
-		//value at start is already the averaged value
-		return arr->getValues()[computeIndex(arr->getWidth(), arr->getHeight(), start.x, start.y)];
+		//we can't subdivide anymore, already at finest grid level
+		int currentIndexH = computeIndex(hExt, cellStart);
+		int currentIndex = computeIndex(Fh->getWidth(), Fh->getHeight(), cellStart.x - 1, cellStart.y - 1);
+		int leftIndex = computeIndex(Fh->getWidth(), Fh->getHeight(), cellStart.x - 2, cellStart.y - 1);
+		int bottomIndex = computeIndex(Fh->getWidth(), Fh->getHeight(), cellStart.x - 1, cellStart.y - 2);
+
+		h->getValues()[currentIndexH] -= dt * ((Fh->getValues()[currentIndex] - Fh->getValues()[leftIndex]) * dxi + (Gh->getValues()[currentIndex] - Gh->getValues()[bottomIndex]) * dyi);
+		hu->getValues()[currentIndexH] -= dt * ((Fhu->getValues()[currentIndex] - Fhu->getValues()[leftIndex]) * dxi + (Ghu->getValues()[currentIndex] - Ghu->getValues()[bottomIndex]) * dyi + Bu->getValues()[currentIndex] * dxi);
+		hv->getValues()[currentIndexH] -= dt * ((Fhv->getValues()[currentIndex] - Fhv->getValues()[leftIndex]) * dxi + (Ghv->getValues()[currentIndex] - Ghv->getValues()[bottomIndex]) * dyi + Bv->getValues()[currentIndex] * dyi);
 	}
 	else
 	{
-		//array for sub-averages
-		float* subSums = new float[refinementBase];
-		int* numElems = new int[refinementBase];
-
-		//fill those arrays recursively
-		dim3 block(refinementBase);
-		dim3 grid(1);
-		getAveragedVerticalValue_child_kernel << <grid, block >> >(arr, start, refinementBase, myDepth + 1, subSums, numElems);
-
-		//sum them up
-		float res = 0;
-		int num = 0;
-		for (int i = 0; i < refinementBase; i++)
+		int d = h->getDepths()[computeIndex(hExt, cellStart)];
+		if (d == depth)
 		{
-			res += subSums[i];
-			num += numElems[i];
+			//we don't need to subdivide, we are already at desired accuracy
 		}
+		else
+		{
+			//we need to subdivide
+			dim3 block(refinementBaseX, refinementBaseY);
+			dim3 grid(1, 1);
+			eulerTimestep_child_kernel << <grid, block >> >(h, hu, hv,
+				Fh, Fhu, Fhv,
+				Gh, Ghu, Ghv,
+				Bu, Bv,
+				dt, dxi, dyi,
+				refinementBaseX, refinementBaseY, maxRecursions,
+				depth + 1, cellStart, cellExt);
+		}
+	}
 
-		delete[] subSums;
-		delete[] numElems;
+}
 
-		return res / num;
+__global__ void eulerTimestep_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv,
+	TreeArray* Fh, TreeArray* Fhu, TreeArray* Fhv,
+	TreeArray* Gh, TreeArray* Ghu, TreeArray* Ghv,
+	TreeArray* Bu, TreeArray* Bv,
+	float dt, float dxi, float dyi,
+	int refinementBaseX, int refinementBaseY, int maxRecursions)
+{
+	int cellX = threadIdx.x + blockIdx.x * blockDim.x;
+	int cellY = threadIdx.y + blockIdx.y * blockDim.y;
+	uint2 offset = make_uint2(1, 1);
+
+	uint2 hExt = make_uint2(h->getWidth(), h->getHeight());
+	uint2 computeExt = hExt - make_uint2(2, 2);
+	uint2 cellStart;
+	uint2 cellExt;
+	computeCellRectangle(computeExt, refinementBaseX, refinementBaseY, maxRecursions, cellX, cellY, cellStart, cellExt);
+
+	//are we out of bounds?
+	if (cellStart.x >= computeExt.x || cellStart.y >= computeExt.y)
+		return;
+
+	int d = h->getDepths()[computeIndex(hExt, cellStart + offset)];
+	if (d == 0)
+	{
+		//we don't need to subdivide
+		//get the averaged flow on left and right boundary and update cell
+	}
+	else
+	{
+		dim3 block(refinementBaseX, refinementBaseY);
+		dim3 grid(1, 1);
+		eulerTimestep_child_kernel << <grid, block >> >(h, hu, hv,
+			Fh, Fhu, Fhv,
+			Gh, Ghu, Ghv,
+			Bu, Bv,
+			dt, dxi, dyi,
+			refinementBaseX, refinementBaseY, maxRecursions,
+			1, cellStart + offset, cellExt);
 	}
 }
 
-__device__ float getAveragedHorizontalValue(TreeArray* arr, uint2 start, int refinementBase, int myDepth)
+//--------------------------------
+//euler timestep
+__global__ void getMax_child_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv, float2* subOutput, int refinementBaseX, int refinementBaseY, int depth, int maxRecursions, uint2 cellStart, uint2 cellExt)
 {
+	int i = threadIdx.x + blockIdx.x * blockDim.x;
+	int j = threadIdx.y + blockIdx.y * blockDim.y;
 
+	uint2 ccellStart;
+	uint2 ccellExt;
+	computeCellRectangle(cellExt, refinementBaseX, refinementBaseY, maxRecursions - depth, i, j, ccellStart, ccellExt);
+
+	if (ccellStart.x >= ccellExt.x || ccellStart.y >= ccellExt.y)
+		return;
+
+	//modify cell start to global grid
+	cellStart += ccellStart;
+	//modify to real cell area
+	cellExt = ccellExt;
+
+	int currentIndex = computeIndex(h->getWidth(), h->getHeight(), cellStart.x, cellStart.y);
+	int d = h->getDepths()[currentIndex];
+	if (depth == maxRecursions || d == depth)
+	{
+		//we can't subdivide anymore
+		//or we don't need to subdivide anymore
+		float2 maxima = make_float2(h->getValues()[currentIndex], max(fabsf(hu->getValues()[currentIndex]), fabsf(hv->getValues()[currentIndex])));
+		subOutput[computeIndex(refinementBaseX, refinementBaseY, i, j)] = maxima;
+	}
+	else
+	{
+		//we need to subdivide
+		float2* subSubOutput = new float2[refinementBaseX * refinementBaseY];
+		dim3 block(refinementBaseX, refinementBaseY);
+		dim3 grid(1, 1);
+		getMax_child_kernel << <grid, block >> >(h, hu, hv, subSubOutput, refinementBaseX, refinementBaseY, depth + 1, maxRecursions, cellStart, cellExt);
+		cudaDeviceSynchronize();
+
+		//get the maximum subOutput
+		float2 maxima = make_float2(0.0f, 0.0f);
+		for (int k = 0; k < refinementBaseX * refinementBaseY; k++)
+		{
+			maxima.x = max(maxima.x, subSubOutput[k].x);
+			maxima.y = max(maxima.y, subSubOutput[k].y);
+		}
+
+		subOutput[computeIndex(refinementBaseX, refinementBaseY, i, j)] = maxima;
+		delete[] subSubOutput;
+	}
 }
+
+__global__ void getMax_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv, float2* output, int sizeX, int sizeY, int refinementBaseX, int refinementBaseY, int maxRecursions)
+{
+	int i = threadIdx.x + blockIdx.x * blockDim.x;
+	int j = threadIdx.y + blockIdx.y * blockDim.y;
+
+	if (i >= sizeX || j >= sizeY)
+		return;
+
+	uint2 hExt = make_uint2(h->getWidth(), h->getHeight());
+	uint2 hCompute = hExt - make_uint2(2, 2);
+	uint2 cellStart;
+	uint2 cellExt;
+	computeCellRectangle(hCompute, refinementBaseX, refinementBaseY, maxRecursions, i, j, cellStart, cellExt);
+	//offset to compute area
+	cellStart += make_uint2(1, 1);
+
+	int currentIndex = computeIndex(hExt, cellStart);
+	if (h->getDepths()[currentIndex] == 0)
+	{
+		//we don't need to subdivide, cell is averaged
+		float2 maxima = make_float2(h->getValues()[currentIndex], max(fabsf(hu->getValues()[currentIndex]), fabsf(hv->getValues()[currentIndex])));
+		output[computeIndex(sizeX, sizeY, i, j)] = maxima;
+	}
+	else
+	{
+		float2* subOutput = new float2[refinementBaseX * refinementBaseY];
+		dim3 block(refinementBaseX, refinementBaseY);
+		dim3 grid(1, 1);
+		getMax_child_kernel << <grid, block >> >(h, hu, hv, subOutput, refinementBaseX, refinementBaseY, 1, maxRecursions, cellStart, cellExt);
+		cudaDeviceSynchronize();
+
+		//get the maximum subOutput
+		float2 maxima = make_float2(0.0f, 0.0f);
+		for (int k = 0; k < refinementBaseX * refinementBaseY; k++)
+		{
+			maxima.x = max(maxima.x, subOutput[k].x);
+			maxima.y = max(maxima.y, subOutput[k].y);
+		}
+
+		output[computeIndex(sizeX, sizeY, i, j)] = maxima;
+		delete[] subOutput;
+	}
+}
+
+//--------------------------------
+//averaging of values
+//__global__ void getAveragedVerticalValue_child_kernel(TreeArray* arr, uint2 globStart, int refinementBase, int myDepth, int maxRecursions, float* resFather, int* numFather)
+//{
+//	int idxY = threadIdx.x + blockIdx.x * blockDim.x;
+//	int baseLengthY = (int)pow(refinementBase, maxRecursions - myDepth);
+//}
+//
+////averaging part of a row / column
+//__device__ float getAveragedVerticalValue(TreeArray* arr, uint2 start, int refinementBase, int myDepth, int maxRecursions)
+//{
+//	//check depth of start, if refinement is needed
+//	if (arr->getDepths()[computeIndex(arr->getWidth(), arr->getHeight(), start.x, start.y)] == myDepth)
+//	{
+//		//no subdivision
+//		//value at start is already the averaged value
+//		return arr->getValues()[computeIndex(arr->getWidth(), arr->getHeight(), start.x, start.y)];
+//	}
+//	else
+//	{
+//		//array for sub-averages
+//		float* subSums = new float[refinementBase];
+//		int* numElems = new int[refinementBase];
+//
+//		//fill those arrays recursively
+//		dim3 block(refinementBase);
+//		dim3 grid(1);
+//		getAveragedVerticalValue_child_kernel << <grid, block >> >(arr, start, refinementBase, myDepth + 1, subSums, numElems);
+//
+//		//sum them up
+//		float res = 0;
+//		int num = 0;
+//		for (int i = 0; i < refinementBase; i++)
+//		{
+//			res += subSums[i];
+//			num += numElems[i];
+//		}
+//
+//		delete[] subSums;
+//		delete[] numElems;
+//
+//		return res / num;
+//	}
+//}
+//
+//__device__ float getAveragedHorizontalValue(TreeArray* arr, uint2 start, int refinementBase, int myDepth)
+//{
+//
+//}
