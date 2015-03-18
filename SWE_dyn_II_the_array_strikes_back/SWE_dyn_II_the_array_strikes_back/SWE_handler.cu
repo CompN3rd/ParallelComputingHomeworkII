@@ -21,40 +21,68 @@ SWE_handler::SWE_handler(int x, int y, float dx, float dy, float g, int rBX, int
 
 	this->blockSize = dim3(bSX, bSY);
 
-	//create managed arrays for grids
-	h = new TreeArray(nx + 2, ny + 2);
-	hu = new TreeArray(nx + 2, ny + 2);
-	hv = new TreeArray(nx + 2, ny + 2);
-	b = new TreeArray(nx + 2, ny + 2);
+	//create array for adaptivity:
+	tree = new ArrayHelper<int>(nx + 2, ny + 2);
+	checkCudaErrors(cudaMalloc(&d_tree, (nx + 2) * (ny + 2) * sizeof(int)));
+
+	//create arrays for grids
+	h = new ArrayHelper<float>(nx + 2, ny + 2);
+	checkCudaErrors(cudaMalloc(&d_h, (nx + 2) * (ny + 2) * sizeof(float)));
+	hu = new ArrayHelper<float>(nx + 2, ny + 2);
+	checkCudaErrors(cudaMalloc(&d_hu, (nx + 2) * (ny + 2) * sizeof(float)));
+	hv = new ArrayHelper<float>(nx + 2, ny + 2);
+	checkCudaErrors(cudaMalloc(&d_hv, (nx + 2) * (ny + 2) * sizeof(float)));
+	b = new ArrayHelper<float>(nx + 2, ny + 2);
+	checkCudaErrors(cudaMalloc(&d_b, (nx + 2) * (ny + 2) * sizeof(float)));
 
 	//and fluxes
-	Bu = new TreeArray(nx + 1, ny + 1);
-	Bv = new TreeArray(nx + 1, ny + 1);
+	Bu = new ArrayHelper<float>(nx + 1, ny + 1);
+	checkCudaErrors(cudaMalloc(&d_Bu, (nx + 1) * (ny + 1) * sizeof(float)));
+	Bv = new ArrayHelper<float>(nx + 1, ny + 1);
+	checkCudaErrors(cudaMalloc(&d_Bv, (nx + 1) * (ny + 1) * sizeof(float)));
 
-	Fh = new TreeArray(nx + 1, ny + 1);
-	Fhu = new TreeArray(nx + 1, ny + 1);
-	Fhv = new TreeArray(nx + 1, ny + 1);
-	Gh = new TreeArray(nx + 1, ny + 1);
-	Ghu = new TreeArray(nx + 1, ny + 1);
-	Ghv = new TreeArray(nx + 1, ny + 1);
+	Fh = new ArrayHelper<float>(nx + 1, ny + 1);
+	checkCudaErrors(cudaMalloc(&d_Fh, (nx + 1) * (ny + 1) * sizeof(float)));
+	Fhu = new ArrayHelper<float>(nx + 1, ny + 1);
+	checkCudaErrors(cudaMalloc(&d_Fhu, (nx + 1) * (ny + 1) * sizeof(float)));
+	Fhv = new ArrayHelper<float>(nx + 1, ny + 1);
+	checkCudaErrors(cudaMalloc(&d_Fhv, (nx + 1) * (ny + 1) * sizeof(float)));
+	Gh = new ArrayHelper<float>(nx + 1, ny + 1);
+	checkCudaErrors(cudaMalloc(&d_Gh, (nx + 1) * (ny + 1) * sizeof(float)));
+	Ghu = new ArrayHelper<float>(nx + 1, ny + 1);
+	checkCudaErrors(cudaMalloc(&d_Ghu, (nx + 1) * (ny + 1) * sizeof(float)));
+	Ghv = new ArrayHelper<float>(nx + 1, ny + 1);
+	checkCudaErrors(cudaMalloc(&d_Ghv, (nx + 1) * (ny + 1) * sizeof(float)));
 }
 
 SWE_handler::~SWE_handler()
 {
 	delete h;
+	checkCudaErrors(cudaFree(d_h));
 	delete hu;
+	checkCudaErrors(cudaFree(d_hu));
 	delete hv;
+	checkCudaErrors(cudaFree(d_hv));
 	delete b;
+	checkCudaErrors(cudaFree(d_b));
 
 	delete Bu;
+	checkCudaErrors(cudaFree(d_Bu));
 	delete Bv;
+	checkCudaErrors(cudaFree(d_Bv));
 
 	delete Fh;
+	checkCudaErrors(cudaFree(d_Fh));
 	delete Fhu;
+	checkCudaErrors(cudaFree(d_Fhu));
 	delete Fhv;
+	checkCudaErrors(cudaFree(d_Fhv));
 	delete Gh;
+	checkCudaErrors(cudaFree(d_Gh));
 	delete Ghu;
+	checkCudaErrors(cudaFree(d_Ghu));
 	delete Ghv;
+	checkCudaErrors(cudaFree(d_Ghv));
 }
 
 //-------------------------------------------------
@@ -71,11 +99,13 @@ void SWE_handler::setInitialValues(float h, float u, float v)
 			this->hv->getValues()[computeIndex(this->hv->getWidth(), this->hv->getHeight(), i, j)] = h * v;
 
 			//set the depths to maximum depth
-			this->h->getDepths()[computeIndex(this->h->getWidth(), this->h->getHeight(), i, j)] = this->maxRecursions;
-			this->hu->getDepths()[computeIndex(this->hu->getWidth(), this->hu->getHeight(), i, j)] = this->maxRecursions;
-			this->hv->getDepths()[computeIndex(this->hv->getWidth(), this->hv->getHeight(), i, j)] = this->maxRecursions;
+			tree[computeIndex(this->h->getWidth(), this->h->getHeight(), i, j)] = this->maxRecursions;
 		}
 	}
+	checkCudaErrors(cudaMemcpy(this->d_h, this->h->getValues(), this->h->getWidth() * this->h->getHeight() * sizeof(float), cudaMemcpyHostToDevice));
+	checkCudaErrors(cudaMemcpy(this->d_hu, this->h->getValues(), this->h->getWidth() * this->h->getHeight() * sizeof(float), cudaMemcpyHostToDevice));
+	checkCudaErrors(cudaMemcpy(this->d_hv, this->h->getValues(), this->h->getWidth() * this->h->getHeight() * sizeof(float), cudaMemcpyHostToDevice));
+	checkCudaErrors(cudaMemcpy(this->d_tree, this->tree, this->h->getWidth() * this->h->getHeight() * sizeof(int), cudaMemcpyHostToDevice));
 }
 
 void SWE_handler::setInitialValues(float(*h)(float, float), float u, float v)
@@ -90,11 +120,13 @@ void SWE_handler::setInitialValues(float(*h)(float, float), float u, float v)
 			this->hv->getValues()[computeIndex(this->hv->getWidth(), this->hv->getHeight(), i, j)] = h((i-0.5f)*dx, (j-0.5f)*dy) * v;
 
 			//set the depths to maximum depth
-			this->h->getDepths()[computeIndex(this->h->getWidth(), this->h->getHeight(), i, j)] = this->maxRecursions;
-			this->hu->getDepths()[computeIndex(this->hu->getWidth(), this->hu->getHeight(), i, j)] = this->maxRecursions;
-			this->hv->getDepths()[computeIndex(this->hv->getWidth(), this->hv->getHeight(), i, j)] = this->maxRecursions;
+			tree[computeIndex(this->h->getWidth(), this->h->getHeight(), i, j)] = this->maxRecursions;
 		}
 	}
+	checkCudaErrors(cudaMemcpy(this->d_h, this->h->getValues(), this->h->getWidth() * this->h->getHeight() * sizeof(float), cudaMemcpyHostToDevice));
+	checkCudaErrors(cudaMemcpy(this->d_hu, this->h->getValues(), this->h->getWidth() * this->h->getHeight() * sizeof(float), cudaMemcpyHostToDevice));
+	checkCudaErrors(cudaMemcpy(this->d_hv, this->h->getValues(), this->h->getWidth() * this->h->getHeight() * sizeof(float), cudaMemcpyHostToDevice));
+	checkCudaErrors(cudaMemcpy(this->d_tree, this->tree, this->h->getWidth() * this->h->getHeight() * sizeof(int), cudaMemcpyHostToDevice));
 }
 
 //-------------------------------------------------
@@ -107,9 +139,9 @@ void SWE_handler::setBathymetry(float b)
 		for (int j = 0; j < ny + 2; j++)
 		{
 			this->b->getValues()[computeIndex(this->b->getWidth(), this->b->getHeight(), i, j)] = b;
-			this->b->getDepths()[computeIndex(this->b->getWidth(), this->b->getHeight(), i, j)] = this->maxRecursions;
 		}
 	}
+	checkCudaErrors(cudaMemcpy(this->d_b, this->b->getValues(), this->b->getWidth() * this->b->getHeight() * sizeof(float), cudaMemcpyHostToDevice));
 	computeBathymetrySources();
 }
 
@@ -121,9 +153,9 @@ void SWE_handler::setBathymetry(float(*b)(float, float))
 		for (int j = 0; j < ny + 2; j++)
 		{
 			this->b->getValues()[computeIndex(this->b->getWidth(), this->b->getHeight(), i, j)] = b((i - 0.5f)*dx, (j - 0.5f)*dy);
-			this->b->getDepths()[computeIndex(this->b->getWidth(), this->b->getHeight(), i, j)] = this->maxRecursions;
 		}
 	}
+	checkCudaErrors(cudaMemcpy(this->d_b, this->b->getValues(), this->b->getWidth() * this->b->getHeight() * sizeof(float), cudaMemcpyHostToDevice));
 	computeBathymetrySources();
 }
 
@@ -133,7 +165,7 @@ void SWE_handler::computeBathymetrySources()
 	dim3 blockDim = this->blockSize;
 	dim3 gridDim(divUp(nx + 1, blockSize.x), divUp(ny + 1, blockSize.y));
 
-	computeBathymetrySources_kernel << <gridDim, blockDim >> >(this->h, this->b, this->Bu, this->Bv, this->g, this->maxRecursions);
+	computeBathymetrySources_kernel << <gridDim, blockDim >> >(this->d_h, this->d_b, this->d_Bu, this->d_Bv, this->nx, this->ny this->g, this->maxRecursions);
 	checkCudaErrors(cudaGetLastError());
 }
 
@@ -153,16 +185,16 @@ void SWE_handler::setBoundaryLayer()
 	dim3 horizontalBlock(this->blockSize.x * this->blockSize.x);
 	dim3 horizontalGrid(divUp(this->h->getWidth(), horizontalBlock.x));
 
-	setTopBorder_kernel << <horizontalGrid, horizontalBlock >> >(this->h, this->hu, this->hv, this->top);
-	setBottomBorder_kernel << <horizontalGrid, horizontalBlock >> >(this->h, this->hu, this->hv, this->bottom);
+	setTopBorder_kernel << <horizontalGrid, horizontalBlock >> >(this->d_h, this->d_hu, this->d_hv, this->top);
+	setBottomBorder_kernel << <horizontalGrid, horizontalBlock >> >(this->d_h, this->d_hu, this->d_hv, this->bottom);
 	checkCudaErrors(cudaGetLastError());
 
 	//left right boundary
 	dim3 verticalBlock(this->blockSize.y * this->blockSize.y);
 	dim3 verticalGrid(divUp(this->h->getHeight(), horizontalBlock.x));
 
-	setRightBorder_kernel << <verticalGrid, verticalBlock >> >(this->h, this->hu, this->hv, this->right);
-	setLeftBorder_kernel << <verticalGrid, verticalBlock >> >(this->h, this->hu, this->hv, this->left);
+	setRightBorder_kernel << <verticalGrid, verticalBlock >> >(this->d_h, this->d_hu, this->d_hv, this->right);
+	setLeftBorder_kernel << <verticalGrid, verticalBlock >> >(this->d_h, this->d_hu, this->d_hv, this->left);
 	checkCudaErrors(cudaGetLastError());
 }
 
@@ -202,10 +234,10 @@ float SWE_handler::eulerTimestep()
 	dim3 block = this->blockSize;
 	dim3 grid = dim3(computeForestBase(this->nx, this->refinementBaseX, this->maxRecursions), computeForestBase(this->ny, this->refinementBaseX, this->maxRecursions));
 
-	eulerTimestep_kernel << <grid, block >> >(this->h, this->hu, this->hv,
-		this->Fh, this->Fhu, this->Fhv,
-		this->Gh, this->Ghu, this->Ghv,
-		this->Bu, this->Bv,
+	eulerTimestep_kernel << <grid, block >> >(this->d_h, this->d_hu, this->d_hv,
+		this->d_Fh, this->d_Fhu, this->d_Fhv,
+		this->d_Gh, this->d_Ghu, this->d_Ghv,
+		this->d_Bu, this->d_Bv,
 		this->dt, this->dx, this->dy,
 		this->refinementBaseX, this->refinementBaseY, this->maxRecursions);
 
@@ -218,10 +250,10 @@ void SWE_handler::computeFluxes()
 {
 	dim3 blockDim = this->blockSize;
 	dim3 gridDim(divUp(Fh->getWidth(), blockDim.x), divUp(Fh->getHeight(), blockDim.y));
-	computeFluxesF_kernel << <gridDim, blockDim >> >(this->h, this->hu, this->hv, this->Fh, this->Fhu, this->Fhv, this->g);
+	computeFluxesF_kernel << <gridDim, blockDim >> >(this->d_h, this->d_hu, this->d_hv, this->d_Fh, this->d_Fhu, this->d_Fhv, this->g);
 
 	gridDim = dim3(divUp(Gh->getWidth(), blockDim.x), divUp(Gh->getHeight(), blockDim.y));
-	computeFluxesG_kernel << <gridDim, blockDim >> >(this->h, this->hu, this->hv, this->Gh, this->Ghu, this->Ghv, this->g);
+	computeFluxesG_kernel << <gridDim, blockDim >> >(this->d_h, this->d_hu, this->d_hv, this->d_Gh, this->d_Ghu, this->d_Ghv, this->g);
 }
 
 //-------------------------------------------------
@@ -240,7 +272,7 @@ float SWE_handler::getMaxTimestep()
 
 	//to be sure, that the simulation is finished
 	checkCudaErrors(cudaDeviceSynchronize());
-	getMax_kernel << <grid, block >> >(this->h, this->hu, this->hv, result, grid.x, grid.y, this->refinementBaseX, this->refinementBaseY, this->maxRecursions);
+	getMax_kernel << <grid, block >> >(this->d_h, this->d_hu, this->d_hv, result, grid.x, grid.y, this->refinementBaseX, this->refinementBaseY, this->maxRecursions);
 	checkCudaErrors(cudaDeviceSynchronize());
 
 	for (unsigned int i = 0; i < grid.x * grid.y; i++)

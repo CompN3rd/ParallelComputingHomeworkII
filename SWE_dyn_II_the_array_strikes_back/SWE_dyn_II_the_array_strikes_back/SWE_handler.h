@@ -19,25 +19,28 @@ private:
 
 	dim3 blockSize;
 
+	//grid representation
+	ArrayHelper<int>* tree; int* d_tree;
+
 	//solution
-	TreeArray* h;
-	TreeArray* hu;
-	TreeArray* hv;
+	ArrayHelper<float>* h; float* d_h;
+	ArrayHelper<float>* hu; float* d_hu;
+	ArrayHelper<float>* hv; float* d_hv;
 
 	//Bathymetry
-	TreeArray* b;
+	ArrayHelper<float>* b; float* d_b;
 
 	//fluxes
-	TreeArray* Fh;
-	TreeArray* Fhu;
-	TreeArray* Fhv;
-	TreeArray* Gh;
-	TreeArray* Ghu;
-	TreeArray* Ghv;
+	ArrayHelper<float>* Fh; float* d_Fh;
+	ArrayHelper<float>* Fhu; float* d_Fhu;
+	ArrayHelper<float>* Fhv; float* d_Fhv;
+	ArrayHelper<float>* Gh; float* d_Gh;
+	ArrayHelper<float>* Ghu; float* d_Ghu;
+	ArrayHelper<float>* Ghv; float* d_Ghv;
 
 	//bathymetry fluxes
-	TreeArray* Bu;
-	TreeArray* Bv;
+	ArrayHelper<float>* Bu; float* d_Bu;
+	ArrayHelper<float>* Bv; float* d_Bv;
 
 	//boundary
 	BoundaryType left, top, right, bottom;
@@ -60,6 +63,13 @@ public:
 	void computeFluxes();
 	float eulerTimestep();
 	float getMaxTimestep();
+
+	inline void synchronizeSolution()
+	{
+		checkCudaErrors(cudaMemcpy(this->h->getValues(), this->d_h, (nx + 2) * (ny + 2) * sizeof(float), cudaMemcpyDeviceToHost));
+		checkCudaErrors(cudaMemcpy(this->hu->getValues(), this->d_hu, (nx + 2) * (ny + 2) * sizeof(float), cudaMemcpyDeviceToHost));
+		checkCudaErrors(cudaMemcpy(this->hv->getValues(), this->d_hv, (nx + 2) * (ny + 2) * sizeof(float), cudaMemcpyDeviceToHost));
+	}
 
 	inline void setTimestep(float t)
 	{

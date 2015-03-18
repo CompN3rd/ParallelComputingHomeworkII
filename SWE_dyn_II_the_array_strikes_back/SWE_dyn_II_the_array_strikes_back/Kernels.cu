@@ -1,23 +1,23 @@
 #include "Kernels.h"
 
-__global__ void setTopBorder_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv, BoundaryType top)
+__global__ void setTopBorder_kernel(float* h, float* hu, float* hv, int sizeX, int sizeY, BoundaryType top);
 {
 	int idx = threadIdx.x + blockIdx.x * blockDim.x;
 
-	if (idx >= h->getWidth())
+	if (idx >= sizeX + 2)
 		return;
 
 	if (top == CONNECT)
 	{
-		h->getValues()[computeIndex(h->getWidth(), h->getHeight(), idx, h->getHeight() - 1)] = h->getValues()[computeIndex(h->getWidth(), h->getHeight(), idx, 1)];
-		hu->getValues()[computeIndex(hu->getWidth(), hu->getHeight(), idx, hu->getHeight() - 1)] = hu->getValues()[computeIndex(hu->getWidth(), hu->getHeight(), idx, 1)];
-		hv->getValues()[computeIndex(hv->getWidth(), hv->getHeight(), idx, hv->getHeight() - 1)] = hv->getValues()[computeIndex(hv->getWidth(), hv->getHeight(), idx, 1)];
+		h[computeIndex(sizeX + 2, sizeY + 2, idx, sizeY + 1)] = h[computeIndex(sizeX + 2, sizeY + 2, idx, 1)];
+		hu[computeIndex(sizeX + 2, sizeY + 2, idx, sizeY + 1)] = h[computeIndex(sizeX + 2, sizeY + 2, idx, 1)];
+		hv[computeIndex(sizeX + 2, sizeY + 2, idx, sizeY + 1)] = h[computeIndex(sizeX + 2, sizeY + 2, idx, 1)];
 	}
 	else
 	{
-		h->getValues()[computeIndex(h->getWidth(), h->getHeight(), idx, h->getHeight() - 1)] = h->getValues()[computeIndex(h->getWidth(), h->getHeight(), idx, h->getHeight() - 2)];
-		hu->getValues()[computeIndex(hu->getWidth(), hu->getHeight(), idx, hu->getHeight() - 1)] = hu->getValues()[computeIndex(hu->getWidth(), hu->getHeight(), idx, hu->getHeight() - 2)];
-		hv->getValues()[computeIndex(hv->getWidth(), hv->getHeight(), idx, hv->getHeight() - 1)] = (top == WALL) ? -hv->getValues()[computeIndex(hv->getWidth(), hv->getHeight(), idx, hv->getHeight() - 2)] : hv->getValues()[computeIndex(hv->getWidth(), hv->getHeight(), idx, hv->getHeight() - 2)];
+		h[computeIndex(sizeX + 2, sizeY + 2, idx, sizeY + 1)] = h[computeIndex(sizeX + 2, sizeY + 2, idx, sizeY)];
+		hu[computeIndex(sizeX + 2, sizeY + 2, idx, sizeY + 1)] = hu[computeIndex(sizeX + 2, sizeY + 2, idx, sizeY)];
+		hv[computeIndex(sizeX + 2, sizeY + 2, idx, sizeY + 1)] = (top == WALL) ? -hv[computeIndex(sizeX + 2, sizeY + 2, idx, sizeY)] : hv[computeIndex(sizeX + 2, sizeY + 2, idx, sizeY)];
 	}
 }
 

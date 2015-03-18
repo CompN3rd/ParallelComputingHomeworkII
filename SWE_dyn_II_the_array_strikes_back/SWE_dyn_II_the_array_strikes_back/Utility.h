@@ -1,4 +1,4 @@
-#include "TreeArray.h"
+#include "ArrayHelper.h"
 
 typedef enum BoundaryType {
 	OUTFLOW, WALL, CONNECT
