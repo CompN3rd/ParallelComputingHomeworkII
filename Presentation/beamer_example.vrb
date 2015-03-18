@@ -1,4 +1,4 @@
-\frametitle{With Pointer}
+\frametitle{GPU Datastructure using pointer}
 \begin{verbatim}
 			class BranchElem : public TreeElem
 			{

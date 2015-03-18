@@ -2,9 +2,10 @@
 \select@language {ngerman}
 \beamer@sectionintoc {1}{The task}{3}{0}{1}
 \beamer@sectionintoc {2}{Dynamic parallelism using CUDA}{4}{0}{2}
-\beamer@subsectionintoc {2}{1}{Implementation DP with CUDA}{4}{0}{2}
-\beamer@subsectionintoc {2}{2}{DP and Syncronisation}{5}{0}{2}
+\beamer@subsectionintoc {2}{1}{Implementation of DP with CUDA}{4}{0}{2}
+\beamer@subsectionintoc {2}{2}{DP and Synchronisation}{5}{0}{2}
 \beamer@subsectionintoc {2}{3}{Recursion Depth and Device Limits}{6}{0}{2}
 \beamer@sectionintoc {3}{The Problem}{7}{0}{3}
 \beamer@subsectionintoc {3}{1}{First try}{8}{0}{3}
 \beamer@subsectionintoc {3}{2}{Back to Arrays}{11}{0}{3}
+\beamer@subsectionintoc {3}{3}{Results and discussion}{12}{0}{3}

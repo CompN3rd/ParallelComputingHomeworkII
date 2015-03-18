@@ -25,7 +25,7 @@
 
 % Titelseite
 \title{Dynamic parallelism using CUDA}
-\subtitle{Example by shallow water equation}
+\subtitle{The shallow water equation on an adaptive grid}
 \author{Marc Kassubeck, Torsten Thoben}
 % Titelgrafik, automatisch beschnitten, Weitere Optionen: <scaled/cropx/cropy>
 % \titlegraphic[cropped]{\includegraphics{infozentrum.jpg}}
@@ -48,10 +48,10 @@
 
 
 \section{The task}
-\begin{frame}{Explaining the Task}
+\begin{frame}{The Task}
 	\begin{itemize}
-		\item extend an existing shallow water sovler
-		\item with dynamic prallelism (DP)
+		\item Extension of an existing shallow water sovler
+		\item With dynamic prallelism (DP)
 	\end{itemize}
 	\centering
 	\includegraphics[width=0.8\textwidth]{dynamicparallelism.png}
@@ -59,34 +59,34 @@
 
 \section{Dynamic parallelism using CUDA}
 
-\subsection{Implementation DP with CUDA}	
-\begin{frame}[fragile]{Implementation DP with CUDA}
+\subsection{Implementation of DP with CUDA}	
+\begin{frame}[fragile]{Implementation of DP with CUDA}
 	\begin{itemize}
-		\item DP in CUDA means calling a Kernel in a Kernal
-		\item so every thread calls a new grid
+		\item DP in CUDA means calling a kernel inside a kernel
+		\item So every thread calls a new grid
 	\end{itemize}
 
 	\begin{verbatim}
 		main(){
 		    ...
-		    <<< g,b >>> func(depth)
+		    func <<< g,b >>> (depth);
 		}
 	\end{verbatim}	
 
 	\begin{verbatim}
-		__global__ void func(int depth)
-		{
+		__global__ void func(int depth){
+		    ...
 		    if(depth<2)
-		        func  <<< g, b >>> (depth+1)
+		        func  <<< g, b >>> (depth+1);
 		}
 	\end{verbatim}
 \end{frame}
 
-\subsection{DP and Syncronisation}
+\subsection{DP and Synchronisation}
 \begin{frame}{DP and Syncronisation}
 	\begin{itemize}
-		\item One Kernel finished if his subkernel finished but it can work on after the supkernel call.
-		\item To syncronize between one thread and his subkernels use cudaDeviceSynchronize() (this will not syncronize between threads)
+		\item Father-kernel finished if his subgrid is finished but can continue working after the subkernel call
+		\item To synchronize between one thread and his subgrids use \texttt{cudaDeviceSynchronize()} ($\neq$ \texttt{\_\_syncthreads()})
 	\end{itemize}
 	\centering
 	\includegraphics[width=0.8\textwidth]{nesting-of-grids.png}
@@ -96,33 +96,35 @@
 \subsection{Recursion Depth and Device Limits}
 \begin{frame}[fragile]{Recursion Depth and Device Limits}
 	\begin{itemize}
-		\item nesting depth, limit to 24
+		\item Nesting depth (hardware-limit is 24)
 			\begin{itemize}
-				\item need to reserver buffer for running/suspended or launching kernels
-				\item cudaDeviceSetLimit(cudaLimitDevRuntimePendingLaunchCount, x);
-				\item default is set to 2048
+				\item Need to reserve a buffer for running/suspended or launching kernels
+				\item \texttt{cudaDeviceSetLimit( cudaLimitDevRuntimePendingLaunchCount, x)}
+				\item Default is set to 2048
 			\end{itemize}
-		\item synchronization depth
+		\item Synchronization depth
 			\begin{itemize}
-				\item cudaDeviceLimit(cudaLimitDevRuntimeSyncDepth, x)
-				\item standart is 2
+				\item \texttt{cudaDeviceLimit(cudaLimitDevRuntimeSyncDepth, x)}
+				\item Default is set to 2
 			\end{itemize}
 	\end{itemize}
 \end{frame}
 
 
 \section{The Problem}
-	\begin{frame}{Problem: Implemting of the datastructure}
+	\begin{frame}{Problem: Implementation of the datastructure}
 		\begin{itemize}
 			\item Datastructure: Forest (many Trees)
-			\item Limit to getting coarse is the Forestsize (number of Trees)
+			\item Limit to coarseness is the \texttt{forestsize} (number of trees)
 			\item Limit to getting fine end up to the maximum recursions
 			\item Trees: eg Quadtrees, Octrees...
-		\end{itemize}		
+		\end{itemize}
+		\centering	
+		\includegraphics[width=0.8\textwidth]{dynamicparallelism.png}	
 	\end{frame}
 \subsection{First try}
 
-\begin{frame}[fragile]{With Pointer}
+\begin{frame}[fragile]{GPU Datastructure using pointer}
 	\begin{verbatim}
 			class LeafElem : public TreeElem
 			{
@@ -138,7 +140,7 @@
 	\end{verbatim}
 \end{frame}
 
-\begin{frame}[fragile]{With Pointer}
+\begin{frame}[fragile]{GPU Datastructure using pointer}
 	\begin{verbatim}
 			class BranchElem : public TreeElem
 			{
@@ -157,30 +159,72 @@
 	\end{verbatim}
 \end{frame}
 
-\begin{frame}{But this dont work}
+\begin{frame}{But this fails}
+	\begin{center}
+	\includegraphics[width=1\textwidth]{fehler.png}
+	\end{center}
+	\begin{itemize}
+		\item Kernel calls take too long to execute (> 7 seconds)
+		\item Possible causes:
+		\begin{itemize}
+			\item Exponentially growing trees 
+			\item Overhead to launch subgrids
+			\item No coalesced memory access with pointers of this data structure
+		\end{itemize}
+	\end{itemize}
 \end{frame}
 
 \subsection{Back to Arrays}
-	\begin{frame}{Storing the Tree-Structure in an Array}
+	\begin{frame}{Storing the tree-structure in an Integer array}
 		\centering
-		\begin{tabular}{ | c | c | c | c | c | c | c | c |}
+		\begin{tabular}{ | c | c | c | c || c | c | c | c |}
 			\hline
   			0 & 0 & 0 & 0 & 1 & 1 & 2 & 2 \\ \hline
   			0 & 0 & 0 & 0 & 1 & 1 & 2 & 2 \\ \hline
   			0 & 0 & 0 & 0 & 1 & 1 & 1 & 1 \\ \hline
-			0 & 0 & 0 & 0 & 1 & 1 & 1 & 1 \\ \hline
+			0 & 0 & 0 & 0 & 1 & 1 & 1 & 1 \\ \hline \hline
   			0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \hline
   			0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \hline
   			0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \hline
   			0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \hline
 		\end{tabular}
+		\begin{itemize}
+			\item Integer values denote the level in the tree
+			\item The higher the value, the finer the grid will be in this area
+			\item Solution values are averaged and stored in all corresponding 'supercells'
+			\item Allows for better coalesced memory access
+		\end{itemize}
 	\end{frame}
 	
+\subsection{Results and discussion}
 	\begin{frame}{Profiling}
 		\centering
 		\includegraphics[width=1\textwidth]{profilingArray.png}
 	\end{frame}
-
-
+	
+	\begin{frame}{Results}
+		\centering
+		\includegraphics[height=\textheight]{res.png}
+	\end{frame}
+	
+	\begin{frame}{Problems}
+		\begin{itemize}
+			\item Unfortunately this is still the solution using the original solver
+			\item Some problems surfaced, when implementing the dynamic version
+			\item Implementing the memory using CUDA Unified memory:
+			\begin{itemize}
+				\item On the one hand no \texttt{cudaMemcpy}
+				\item On the other hand many calls to \texttt{cudaDeviceSynchronize}
+				\item Too much data transfer CPU $\leftrightarrow$ GPU
+				\item Too slow using our current implementation
+			\end{itemize}
+			\item Problems in the solver code
+			\begin{itemize}
+				\item Solutions may contain $\infty$ or \texttt{\#INDEFINITE}
+				\item Maybe stability issue
+				\item Maybe bug in solver code
+			\end{itemize}
+		\end{itemize}
+	\end{frame}
 
 \end{document}
