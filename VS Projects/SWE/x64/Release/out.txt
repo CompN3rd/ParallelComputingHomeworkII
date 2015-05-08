@@ -1291,8 +1291,6 @@ Copy unknowns from device
 Simulation at time 0.01005
 hmax 112.619
 vmax 4.68671
-Copy unknowns from device
-Write output file: water level at time 0.01005
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -2679,8 +2677,6 @@ Copy unknowns from device
 Simulation at time 0.0200542
 hmax 110.87
 vmax 4.46042
-Copy unknowns from device
-Write output file: water level at time 0.0200542
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -2987,6 +2983,8 @@ Copy unknowns from device
 Simulation at time 0.0222734
 hmax 111.626
 vmax 4.31366
+Copy unknowns from device
+Write output file: water level at time 0.0222734
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -4058,8 +4056,6 @@ Copy unknowns from device
 Simulation at time 0.0300088
 hmax 111.96
 vmax 5.46276
-Copy unknowns from device
-Write output file: water level at time 0.0300088
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -5446,8 +5442,6 @@ Copy unknowns from device
 Simulation at time 0.0400284
 hmax 104.699
 vmax 3.90302
-Copy unknowns from device
-Write output file: water level at time 0.0400284
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -6024,6 +6018,8 @@ Copy unknowns from device
 Simulation at time 0.0444457
 hmax 107.256
 vmax 3.81911
+Copy unknowns from device
+Write output file: water level at time 0.0444457
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -6753,8 +6749,6 @@ Copy unknowns from device
 Simulation at time 0.0500261
 hmax 105.725
 vmax 3.17309
-Copy unknowns from device
-Write output file: water level at time 0.0500261
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -8096,8 +8090,6 @@ Copy unknowns from device
 Simulation at time 0.0600285
 hmax 108.085
 vmax 4.97418
-Copy unknowns from device
-Write output file: water level at time 0.0600285
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -9007,6 +8999,8 @@ Copy unknowns from device
 Simulation at time 0.0666803
 hmax 108.215
 vmax 4.51919
+Copy unknowns from device
+Write output file: water level at time 0.0666803
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -9457,8 +9451,6 @@ Copy unknowns from device
 Simulation at time 0.0700346
 hmax 108.428
 vmax 5.43288
-Copy unknowns from device
-Write output file: water level at time 0.0700346
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -10827,8 +10819,6 @@ Copy unknowns from device
 Simulation at time 0.0800624
 hmax 110.733
 vmax 5.2689
-Copy unknowns from device
-Write output file: water level at time 0.0800624
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -12035,6 +12025,8 @@ Copy unknowns from device
 Simulation at time 0.0888951
 hmax 106.176
 vmax 4.16597
+Copy unknowns from device
+Write output file: water level at time 0.0888951
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -12188,8 +12180,6 @@ Copy unknowns from device
 Simulation at time 0.0900537
 hmax 108.037
 vmax 4.515
-Copy unknowns from device
-Write output file: water level at time 0.0900537
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -13531,8 +13521,6 @@ Copy unknowns from device
 Simulation at time 0.100062
 hmax 109.861
 vmax 5.33066
-Copy unknowns from device
-Write output file: water level at time 0.100062
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -14865,8 +14853,6 @@ Copy unknowns from device
 Simulation at time 0.110043
 hmax 106.193
 vmax 4.56994
-Copy unknowns from device
-Write output file: water level at time 0.110043
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -15011,6 +14997,8 @@ Copy unknowns from device
 Simulation at time 0.11113
 hmax 109.683
 vmax 3.81644
+Copy unknowns from device
+Write output file: water level at time 0.11113
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -16217,8 +16205,6 @@ Copy unknowns from device
 Simulation at time 0.12005
 hmax 107.642
 vmax 4.95854
-Copy unknowns from device
-Write output file: water level at time 0.12005
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -17560,8 +17546,6 @@ Copy unknowns from device
 Simulation at time 0.130051
 hmax 107.002
 vmax 3.47264
-Copy unknowns from device
-Write output file: water level at time 0.130051
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -18021,6 +18005,8 @@ Copy unknowns from device
 Simulation at time 0.13339
 hmax 108.696
 vmax 5.00337
+Copy unknowns from device
+Write output file: water level at time 0.13339
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -18903,8 +18889,6 @@ Copy unknowns from device
 Simulation at time 0.140013
 hmax 106.007
 vmax 4.50461
-Copy unknowns from device
-Write output file: water level at time 0.140013
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -20246,8 +20230,6 @@ Copy unknowns from device
 Simulation at time 0.15005
 hmax 108.947
 vmax 3.53234
-Copy unknowns from device
-Write output file: water level at time 0.15005
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -21013,6 +20995,8 @@ Copy unknowns from device
 Simulation at time 0.155611
 hmax 109.267
 vmax 4.90673
+Copy unknowns from device
+Write output file: water level at time 0.155611
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -21607,8 +21591,6 @@ Copy unknowns from device
 Simulation at time 0.160021
 hmax 108.056
 vmax 4.56945
-Copy unknowns from device
-Write output file: water level at time 0.160021
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -22977,8 +22959,6 @@ Copy unknowns from device
 Simulation at time 0.170042
 hmax 111.731
 vmax 4.40268
-Copy unknowns from device
-Write output file: water level at time 0.170042
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -24014,6 +23994,8 @@ Copy unknowns from device
 Simulation at time 0.177815
 hmax 108.733
 vmax 4.5059
+Copy unknowns from device
+Write output file: water level at time 0.177815
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -24311,8 +24293,6 @@ Copy unknowns from device
 Simulation at time 0.180045
 hmax 108.5
 vmax 4.97276
-Copy unknowns from device
-Write output file: water level at time 0.180045
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -25654,8 +25634,6 @@ Copy unknowns from device
 Simulation at time 0.190029
 hmax 107.061
 vmax 3.56832
-Copy unknowns from device
-Write output file: water level at time 0.190029
 Load unknowns into device memory
 Call kernel to compute bathymetry sources
 Call kernel to compute F-fluxes 
@@ -26981,4 +26959,4 @@ hmax 109.21
 vmax 5.07458
 Copy unknowns from device
 Write output file: water level at time 0.200016
-Execution time: 24.000000 sec. 3.986000 (CPU sec) 
+Execution time: 13.000000 sec. 3.089000 (CPU sec) 

@@ -1,7 +1,6 @@
 #include "treeOperations.h"
 
-#define SUBDIV 2
-#define THREADS 128
+#define SUBDIV 16
 
 __global__ void testCase(int nx, int ny, int* res)
 {
@@ -30,31 +29,28 @@ int main(int argc, char** argv)
 	}
 
 	cudaDeviceSetLimit(cudaLimitDevRuntimeSyncDepth, 5);
-	cudaDeviceSetLimit(cudaLimitDevRuntimePendingLaunchCount, 32768);
 
 	size_t lim;
 	cudaDeviceGetLimit(&lim, cudaLimitDevRuntimeSyncDepth);
 	std::cout << "rsd: " << lim << std::endl;
 
-	lim;
 	cudaDeviceGetLimit(&lim, cudaLimitDevRuntimePendingLaunchCount);
 	std::cout << "plc: " << lim << std::endl;
 
 	std::cout << "nx: " << nx << " ny: " << ny << std::endl;
-	std::cout << "numThreadsX: " << THREADS << " numThreadsY: " << THREADS << std::endl;
 
-	int res[THREADS * THREADS];
+	int res[1];
 	int* res_d;
-	checkCudaErrors(cudaMalloc(&res_d, THREADS * THREADS * sizeof(int)));
+	checkCudaErrors(cudaMalloc(&res_d, 1 * sizeof(int)));
 
-	dim3 block(16 * 16);
-	dim3 grid(THREADS * THREADS / (16 * 16));
+	dim3 block(1);
+	dim3 grid(1);
 	testCase << <grid, block>> >(nx, ny, res_d);
 	checkCudaErrors(cudaGetLastError());
 
-	checkCudaErrors(cudaMemcpy(res, res_d, THREADS * THREADS * sizeof(int), cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(res, res_d, 1 * sizeof(int), cudaMemcpyDeviceToHost));
 
-	for (int i = 0; i < THREADS * THREADS; i++)
+	for (int i = 0; i < 1; i++)
 		std::cout << res[i] << std::endl;
 
 	checkCudaErrors(cudaFree(res_d));

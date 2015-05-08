@@ -1,4 +1,14 @@
-#include "ArrayHelper.h"
+#include <cuda_runtime.h>
+#include <device_functions.h>
+#include <device_launch_parameters.h>
+
+#define __DRIVER_TYPES_H__
+#include <helper_cuda.h>
+#include <helper_timer.h>
+#include <helper_math.h>
+#include <iostream>
+#include <stdio.h>
+#include <fstream>
 
 typedef enum BoundaryType {
 	OUTFLOW, WALL, CONNECT
@@ -53,7 +63,7 @@ __device__ void fillRect(MemoryType* data, const uint2& arrayExtends, MemoryType
 //thread computation
 inline __device__ __host__ unsigned int computeForestBase(unsigned int dimension, unsigned int base, unsigned int maxRecursions)
 {
-	return divUp(dimension, (unsigned int)pow(base, maxRecursions));
+	return divUp(dimension, (unsigned int)pow((float)base, (float)maxRecursions));
 }
 
 //cell rectangle
@@ -67,8 +77,8 @@ inline __device__ __host__ void computeCellRectangle(const uint2 ext, unsigned i
 	cellStart.x = x;
 	cellStart.y = y;
 
-	cellExt.x = x + baseLengthX < ext.x ? baseLengthX : 0;
-	cellExt.y = y + baseLengthY < ext.y ? baseLengthY : 0;
+	cellExt.x = (x + baseLengthX <= ext.x) ? baseLengthX : ext.x - x;
+	cellExt.y = (y + baseLengthY <= ext.y) ? baseLengthY : ext.y - y;
 }
 
 // local Lax-Friedrich

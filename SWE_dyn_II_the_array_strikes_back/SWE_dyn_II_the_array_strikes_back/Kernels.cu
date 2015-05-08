@@ -1,6 +1,6 @@
 #include "Kernels.h"
 
-__global__ void setTopBorder_kernel(float* h, float* hu, float* hv, int sizeX, int sizeY, BoundaryType top);
+__global__ void setTopBorder_kernel(float* h, float* hu, float* hv, int sizeX, int sizeY, BoundaryType top)
 {
 	int idx = threadIdx.x + blockIdx.x * blockDim.x;
 
@@ -21,66 +21,66 @@ __global__ void setTopBorder_kernel(float* h, float* hu, float* hv, int sizeX, i
 	}
 }
 
-__global__ void setBottomBorder_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv, BoundaryType bottom)
+__global__ void setBottomBorder_kernel(float* h, float* hu, float* hv, int sizeX, int sizeY, BoundaryType bottom)
 {
 	int idx = threadIdx.x + blockIdx.x * blockDim.x;
 
-	if (idx >= h->getWidth())
+	if (idx >= sizeX + 2)
 		return;
 
 	if (bottom == CONNECT)
 	{
-		h->getValues()[computeIndex(h->getWidth(), h->getHeight(), idx, 0)] = h->getValues()[computeIndex(h->getWidth(), h->getHeight(), idx, h->getHeight() - 2)];
-		hu->getValues()[computeIndex(hu->getWidth(), hu->getHeight(), idx, 0)] = hu->getValues()[computeIndex(hu->getWidth(), hu->getHeight(), idx, hu->getHeight() - 2)];
-		hv->getValues()[computeIndex(hv->getWidth(), hv->getHeight(), idx, 0)] = hv->getValues()[computeIndex(hv->getWidth(), hv->getHeight(), idx, hv->getHeight() - 2)];
+		h[computeIndex(sizeX + 2, sizeY + 2, idx, 0)] = h[computeIndex(sizeX + 2, sizeY + 2, idx, sizeY)];
+		hu[computeIndex(sizeX + 2, sizeY + 2, idx, 0)] = hu[computeIndex(sizeX + 2, sizeY + 2, idx, sizeY)];
+		hv[computeIndex(sizeX + 2, sizeY + 2, idx, 0)] = hv[computeIndex(sizeX + 2, sizeY + 2, idx, sizeY)];
 	}
 	else
 	{
-		h->getValues()[computeIndex(h->getWidth(), h->getHeight(), idx, 0)] = h->getValues()[computeIndex(h->getWidth(), h->getHeight(), idx, 1)];
-		hu->getValues()[computeIndex(hu->getWidth(), hu->getHeight(), idx, 0)] = hu->getValues()[computeIndex(hu->getWidth(), hu->getHeight(), idx, 1)];
-		hv->getValues()[computeIndex(hv->getWidth(), hv->getHeight(), idx, 0)] = (bottom == WALL) ? -hv->getValues()[computeIndex(hv->getWidth(), hv->getHeight(), idx, 1)] : hv->getValues()[computeIndex(hv->getWidth(), hv->getHeight(), idx, 1)];
+		h[computeIndex(sizeX + 2, sizeY + 2, idx, 0)] = h[computeIndex(sizeX + 2, sizeY + 2, idx, 1)];
+		hu[computeIndex(sizeX + 2, sizeY + 2, idx, 0)] = hu[computeIndex(sizeX + 2, sizeY + 2, idx, 1)];
+		hv[computeIndex(sizeX + 2, sizeY + 2, idx, 0)] = (bottom == WALL) ? -hv[computeIndex(sizeX + 2, sizeY + 2, idx, 1)] : hv[computeIndex(sizeX + 2, sizeY + 2, idx, 1)];
 	}
 }
 
-__global__ void setRightBorder_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv, BoundaryType right)
+__global__ void setRightBorder_kernel(float* h, float* hu, float* hv, int sizeX, int sizeY, BoundaryType right)
 {
 	int idx = threadIdx.x + blockIdx.x * blockDim.x;
 
-	if (idx >= h->getHeight())
+	if (idx >= sizeY + 2)
 		return;
 
 	if (right == CONNECT)
 	{
-		h->getValues()[computeIndex(h->getWidth(), h->getHeight(), h->getWidth() - 1, idx)] = h->getValues()[computeIndex(h->getWidth(), h->getHeight(), 1, idx)];
-		hu->getValues()[computeIndex(hu->getWidth(), hu->getHeight(), hu->getWidth() - 1, idx)] = hu->getValues()[computeIndex(hu->getWidth(), hu->getHeight(), 1, idx)];
-		hv->getValues()[computeIndex(hv->getWidth(), hv->getHeight(), hv->getWidth() - 1, idx)] = hv->getValues()[computeIndex(hv->getWidth(), hv->getHeight(), 1, idx)];
+		h[computeIndex(sizeX + 2, sizeY + 2, sizeX +  1, idx)] = h[computeIndex(sizeX + 2, sizeY + 2, 1, idx)];
+		hu[computeIndex(sizeX + 2, sizeY + 2, sizeX +  1, idx)] = hu[computeIndex(sizeX + 2, sizeY + 2, 1, idx)];
+		hv[computeIndex(sizeX + 2, sizeY + 2, sizeX +  1, idx)] = hv[computeIndex(sizeX + 2, sizeY + 2, 1, idx)];
 	}
 	else
 	{
-		h->getValues()[computeIndex(h->getWidth(), h->getHeight(), h->getWidth() - 1, idx)] = h->getValues()[computeIndex(h->getWidth(), h->getHeight(), h->getWidth() - 2, idx)];
-		hu->getValues()[computeIndex(hu->getWidth(), hu->getHeight(), hu->getWidth() - 1, idx)] = (right == WALL) ? -hu->getValues()[computeIndex(hu->getWidth(), hu->getHeight(), hu->getWidth() - 2, idx)] : hu->getValues()[computeIndex(hu->getWidth(), hu->getHeight(), hu->getWidth() - 2, idx)];
-		hv->getValues()[computeIndex(hv->getWidth(), hv->getHeight(), hv->getWidth() - 1, idx)] = hv->getValues()[computeIndex(hv->getWidth(), hv->getHeight(), hv->getWidth() - 2, idx)];
+		h[computeIndex(sizeX + 2, sizeY + 2, sizeX + 1, idx)] = h[computeIndex(sizeX + 2, sizeY + 2, sizeX, idx)];
+		hu[computeIndex(sizeX + 2, sizeY + 2, sizeX + 1, idx)] = (right == WALL) ? -hu[computeIndex(sizeX + 2, sizeY + 2, sizeX, idx)] : hu[computeIndex(sizeX + 2, sizeY + 2, sizeX, idx)];
+		hv[computeIndex(sizeX + 2, sizeY + 2, sizeX + 1, idx)] = hv[computeIndex(sizeX + 2, sizeY + 2, sizeX, idx)];
 	}
 }
 
-__global__ void setLeftBorder_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv, BoundaryType left)
+__global__ void setLeftBorder_kernel(float* h, float* hu, float* hv, int sizeX, int sizeY, BoundaryType left)
 {
 	int idx = threadIdx.x + blockIdx.x * blockDim.x;
 
-	if (idx >= h->getHeight())
+	if (idx >= sizeY + 2)
 		return;
 
 	if (left == CONNECT)
 	{
-		h->getValues()[computeIndex(h->getWidth(), h->getHeight(), 0, idx)] = h->getValues()[computeIndex(h->getWidth(), h->getHeight(), h->getWidth() - 2, idx)];
-		hu->getValues()[computeIndex(hu->getWidth(), hu->getHeight(), 0, idx)] = hu->getValues()[computeIndex(hu->getWidth(), hu->getHeight(), h->getWidth() - 2, idx)];
-		hv->getValues()[computeIndex(hv->getWidth(), hv->getHeight(), 0, idx)] = hv->getValues()[computeIndex(hv->getWidth(), hv->getHeight(), h->getWidth() - 2, idx)];
+		h[computeIndex(sizeX + 2, sizeY + 2, 0, idx)] = h[computeIndex(sizeX + 2, sizeY + 2, sizeX, idx)];
+		hu[computeIndex(sizeX + 2, sizeY + 2, 0, idx)] = hu[computeIndex(sizeX + 2, sizeY + 2, sizeX, idx)];
+		hv[computeIndex(sizeX + 2, sizeY + 2, 0, idx)] = hv[computeIndex(sizeX + 2, sizeY + 2, sizeX, idx)];
 	}
 	else
 	{
-		h->getValues()[computeIndex(h->getWidth(), h->getHeight(), 0, idx)] = h->getValues()[computeIndex(h->getWidth(), h->getHeight(), 1, idx)];
-		hu->getValues()[computeIndex(hu->getWidth(), hu->getHeight(), 0, idx)] = (left == WALL) ? -hu->getValues()[computeIndex(hu->getWidth(), hu->getHeight(), 1, idx)] : hu->getValues()[computeIndex(hu->getWidth(), hu->getHeight(), 1, idx)];
-		hv->getValues()[computeIndex(hv->getWidth(), hv->getHeight(), 0, idx)] = hv->getValues()[computeIndex(hv->getWidth(), hv->getHeight(), 1, idx)];
+		h[computeIndex(sizeX + 2, sizeY + 2, 0, idx)] = h[computeIndex(sizeX + 2, sizeY + 2, 1, idx)];
+		hu[computeIndex(sizeX + 2, sizeY + 2, 0, idx)] = (left == WALL) ? -hu[computeIndex(sizeX + 2, sizeY + 2, 1, idx)] : hu[computeIndex(sizeX + 2, sizeY + 2, 1, idx)];
+		hv[computeIndex(sizeX + 2, sizeY + 2, 0, idx)] = hv[computeIndex(sizeX + 2, sizeY + 2, 1, idx)];
 	}
 }
 
@@ -88,7 +88,7 @@ __global__ void setLeftBorder_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv,
 //bathymetry
 
 //with respect to adaptive nature
-//__global__ void computeHrizontalBathymetryFluxes_kernel(TreeArray* h, TreeArray* b, TreeArray* Bu, float g, int refinementBaseX, int refinementBaseY, int maxRecursions)
+//__global__ void computeHrizontalBathymetryFluxes_kernel(float* h, float* b, float* Bu, float g, int refinementBaseX, int refinementBaseY, int maxRecursions)
 //{
 //	int idxX = threadIdx.x + blockIdx.x * blockDim.x;
 //	int idxY = threadIdx.y + blockIdx.y * blockDim.y;
@@ -141,128 +141,124 @@ __global__ void setLeftBorder_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv,
 
 
 //without respect to adaptive nature (works correct, too)
-__global__ void computeBathymetrySources_kernel(TreeArray* h, TreeArray* b, TreeArray* Bu, TreeArray* Bv, float g, int maxRecursions)
+__global__ void computeBathymetrySources_kernel(float* h, float* b, float* Bu, float* Bv, int sizeX, int sizeY, float g, int maxRecursions)
 {
 	int idxX = threadIdx.x + blockIdx.x * blockDim.x;
 	int idxY = threadIdx.y + blockIdx.y * blockDim.y;
 
-	if (idxX >= Bu->getWidth() || idxY >= Bu->getHeight())
+	if (idxX >= sizeX + 1 || idxY >= sizeY + 1)
 		return;
 
-	int currentIndex = computeIndex(Bu->getWidth(), Bu->getHeight(), idxX, idxY);
-	//this is the "left" or "bottom" index, note the different extends for these arrays
-	int currentIndexH = computeIndex(h->getWidth(), h->getHeight(), idxX, idxY);
-	//for vertical flux
-	int topIndex = computeIndex(h->getWidth(), h->getHeight(), idxX, idxY + 1);
-	//for horizontal flux
-	int rightIndex = computeIndex(h->getWidth(), h->getHeight(), idxX + 1, idxY);
+	int currentIndex = computeIndex(sizeX + 2, sizeY + 2, idxX, idxY);
+	int topIndex = computeIndex(sizeX + 2, sizeY + 2, idxX, idxY + 1);
+	int rightIndex = computeIndex(sizeX + 2, sizeY + 2, idxX + 1, idxY);
 
-	Bu->getDepths()[currentIndex] = maxRecursions;
-	Bv->getDepths()[currentIndex] = maxRecursions;
-
-	Bu->getValues()[currentIndex] = g * (h->getValues()[rightIndex] * b->getValues()[rightIndex] - h->getValues()[currentIndexH] * b->getValues()[currentIndexH]);
-	Bv->getValues()[currentIndex] = g * (h->getValues()[topIndex] * b->getValues()[topIndex] - h->getValues()[currentIndexH] * b->getValues()[currentIndexH]);
+	Bu[currentIndex] = g * (h[rightIndex] * b[rightIndex] - h[currentIndex] * b[currentIndex]);
+	Bv[currentIndex] = g * (h[topIndex] * b[topIndex] - h[currentIndex] * b[currentIndex]);
 }
 
 //--------------------------------
 //fluxes
 
-__global__ void computeFluxesF_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv, TreeArray* Fh, TreeArray* Fhu, TreeArray* Fhv, float g)
+__global__ void computeFluxesF_kernel(float* h, float* hu, float* hv, float* Fh, float* Fhu, float* Fhv, int sizeX, int sizeY, float g)
 {
 	int idxX = threadIdx.x + blockIdx.x * blockDim.x;
 	int idxY = threadIdx.y + blockIdx.y * blockDim.y;
 
-	if (idxX >= Fh->getWidth() || idxY >= Fh->getHeight())
+	if (idxX >= sizeX + 1 || idxY >= sizeY + 1)
 		return;
 
-	int currentIndex = computeIndex(Fh->getWidth(), Fh->getHeight(), idxX, idxY);
-	int currentIndexH = computeIndex(h->getWidth(), h->getHeight(), idxX, idxY);
-	int rightIndexH = computeIndex(h->getWidth(), h->getHeight(), idxX + 1, idxY);
+	int currentIndex = computeIndex(sizeX + 1, sizeY + 1, idxX, idxY);
+	int currentIndexH = computeIndex(sizeX + 2, sizeY + 2, idxX, idxY);
+	int rightIndexH = computeIndex(sizeX + 2, sizeY + 2, idxX + 1, idxY);
 
 	//compute signal velocities
 	float sv1, sv2, llf;
-	sv1 = fabs(hu->getValues()[currentIndexH] / h->getValues()[currentIndexH]) + sqrtf(g * h->getValues()[currentIndexH]);
-	sv2 = fabs(hu->getValues()[rightIndexH] / h->getValues()[rightIndexH]) + sqrtf(g * h->getValues()[rightIndexH]);
+	sv1 = fabs(hu[currentIndexH] / h[currentIndexH]) + sqrtf(g * h[currentIndexH]);
+	sv2 = fabs(hu[rightIndexH] / h[rightIndexH]) + sqrtf(g * h[rightIndexH]);
 	llf = max(sv1, sv2);
 
 	//compute fluxes:
-	Fh->getValues()[currentIndex] = computeFlux(
-		h->getValues()[currentIndexH] * hu->getValues()[currentIndexH],
-		h->getValues()[rightIndexH] * hu->getValues()[rightIndexH],
-		h->getValues()[currentIndexH],
-		h->getValues()[rightIndexH],
+	Fh[currentIndex] = computeFlux(
+		h[currentIndexH] * hu[currentIndexH],
+		h[rightIndexH] * hu[rightIndexH],
+		h[currentIndexH],
+		h[rightIndexH],
 		llf);
 
-	Fhu->getValues()[currentIndex] = computeFlux(
-		hu->getValues()[currentIndexH] * hu->getValues()[currentIndexH] + (0.5f * g * h->getValues()[currentIndexH]),
-		hu->getValues()[rightIndexH] * hu->getValues()[rightIndexH] + (0.5f * g * h->getValues()[rightIndexH]),
-		hu->getValues()[currentIndexH],
-		hu->getValues()[rightIndexH],
+	Fhu[currentIndex] = computeFlux(
+		hu[currentIndexH] * hu[currentIndexH] + (0.5f * g * h[currentIndexH]),
+		hu[rightIndexH] * hu[rightIndexH] + (0.5f * g * h[rightIndexH]),
+		hu[currentIndexH],
+		hu[rightIndexH],
 		llf);
 
-	Fhv->getValues()[currentIndex] = computeFlux(
-		hu->getValues()[currentIndexH] * hv->getValues()[currentIndexH],
-		hu->getValues()[rightIndexH] * hv->getValues()[rightIndexH],
-		hv->getValues()[currentIndexH],
-		hv->getValues()[rightIndexH],
+	Fhv[currentIndex] = computeFlux(
+		hu[currentIndexH] * hv[currentIndexH],
+		hu[rightIndexH] * hv[rightIndexH],
+		hv[currentIndexH],
+		hv[rightIndexH],
 		llf);
 }
 
-__global__ void computeFluxesG_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv, TreeArray* Gh, TreeArray* Ghu, TreeArray* Ghv, float g)
+__global__ void computeFluxesG_kernel(float* h, float* hu, float* hv, float* Gh, float* Ghu, float* Ghv, int sizeX, int sizeY, float g)
 {
 	int idxX = threadIdx.x + blockIdx.x * blockDim.x;
 	int idxY = threadIdx.y + blockIdx.y * blockDim.y;
 
-	if (idxX >= Gh->getWidth() || idxY >= Gh->getHeight())
+	if (idxX >= sizeX + 1 || idxY >= sizeY + 1)
 		return;
 
-	int currentIndex = computeIndex(Gh->getWidth(), Gh->getHeight(), idxX, idxY);
-	int currentIndexH = computeIndex(h->getWidth(), h->getHeight(), idxX, idxY);
-	int topIndexH = computeIndex(h->getWidth(), h->getHeight(), idxX, idxY + 1);
+	int currentIndex = computeIndex(sizeX + 1, sizeY + 1, idxX, idxY);
+	int currentIndexH = computeIndex(sizeX + 2, sizeY + 2, idxX, idxY);
+	int topIndexH = computeIndex(sizeX + 2, sizeY + 2, idxX, idxY + 1);
 
 	//compute signal velocities
 	float sv1, sv2, llf;
-	sv1 = fabs(hv->getValues()[currentIndexH] / h->getValues()[currentIndexH]) + sqrtf(g * h->getValues()[currentIndexH]);
-	sv2 = fabs(hv->getValues()[topIndexH] / h->getValues()[topIndexH]) + sqrtf(g * h->getValues()[topIndexH]);
+	sv1 = fabs(hv[currentIndexH] / h[currentIndexH]) + sqrtf(g * h[currentIndexH]);
+	sv2 = fabs(hv[topIndexH] / h[topIndexH]) + sqrtf(g * h[topIndexH]);
 	llf = max(sv1, sv2);
 
 	//compute fluxes
-	Gh->getValues()[currentIndex] = computeFlux(
-		h->getValues()[currentIndexH] * hv->getValues()[currentIndexH],
-		h->getValues()[topIndexH] * hv->getValues()[topIndexH],
-		h->getValues()[currentIndexH],
-		h->getValues()[topIndexH],
+	Gh[currentIndex] = computeFlux(
+		h[currentIndexH] * hv[currentIndexH],
+		h[topIndexH] * hv[topIndexH],
+		h[currentIndexH],
+		h[topIndexH],
 		llf);
 
-	Ghu->getValues()[currentIndex] = computeFlux(
-		hu->getValues()[currentIndexH] * hv->getValues()[currentIndexH],
-		hu->getValues()[topIndexH] * hv->getValues()[topIndexH],
-		hu->getValues()[currentIndexH],
-		hu->getValues()[topIndexH],
+	Ghu[currentIndex] = computeFlux(
+		hu[currentIndexH] * hv[currentIndexH],
+		hu[topIndexH] * hv[topIndexH],
+		hu[currentIndexH],
+		hu[topIndexH],
 		llf);
 
-	Ghv->getValues()[currentIndex] = computeFlux(
-		hv->getValues()[currentIndexH] * hv->getValues()[currentIndexH] + (0.5f * g * h->getValues()[currentIndexH]),
-		hv->getValues()[topIndexH] * hv->getValues()[topIndexH] + (0.5f * g * h->getValues()[topIndexH]),
-		hv->getValues()[currentIndexH],
-		hv->getValues()[topIndexH],
+	Ghv[currentIndex] = computeFlux(
+		hv[currentIndexH] * hv[currentIndexH] + (0.5f * g * h[currentIndexH]),
+		hv[topIndexH] * hv[topIndexH] + (0.5f * g * h[topIndexH]),
+		hv[currentIndexH],
+		hv[topIndexH],
 		llf);
 }
 
 //--------------------------------
 //euler timestep
-__global__ void eulerTimestep_child_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv,
-	TreeArray* Fh, TreeArray* Fhu, TreeArray* Fhv,
-	TreeArray* Gh, TreeArray* Ghu, TreeArray* Ghv,
-	TreeArray* Bu, TreeArray* Bv,
+__global__ void eulerTimestep_child_kernel(float* h, float* hu, float* hv,
+	float* Fh, float* Fhu, float* Fhv,
+	float* Gh, float* Ghu, float* Ghv,
+	float* Bu, float* Bv,
+	int* tree,
+	int sizeX, int sizeY,
 	float dt, float dxi, float dyi,
 	int refinementBaseX, int refinementBaseY, int maxRecursions,
 	int depth, uint2 cellStart, uint2 cellExt)
 {
 	int cellOffX = threadIdx.x + blockIdx.x * blockDim.x;
 	int cellOffY = threadIdx.y + blockIdx.y * blockDim.y;
+	uint2 offset = make_uint2(1, 1);
 
-	uint2 hExt = make_uint2(h->getWidth(), h->getHeight());
+	uint2 hExt = make_uint2(sizeX + 2, sizeY + 2);
 	uint2 ccellStart;
 	uint2 ccellExt;
 	computeCellRectangle(cellExt, refinementBaseX, refinementBaseY, maxRecursions - depth, cellOffX, cellOffY, ccellStart, ccellExt);
@@ -270,26 +266,31 @@ __global__ void eulerTimestep_child_kernel(TreeArray* h, TreeArray* hu, TreeArra
 	if (ccellStart.x >= cellExt.x || ccellStart.y >= cellExt.y)
 		return;
 
-	//modify cellStart to the global grid
+	//modify cellStart to the global compute grid grid
 	cellStart += ccellStart;
 	//modify cellExt to the real cell extends
 	cellExt = ccellExt;
 
 	if (depth == maxRecursions)
 	{
-		//we can't subdivide anymore, already at finest grid level
-		int currentIndexH = computeIndex(hExt, cellStart);
-		int currentIndex = computeIndex(Fh->getWidth(), Fh->getHeight(), cellStart.x - 1, cellStart.y - 1);
-		int leftIndex = computeIndex(Fh->getWidth(), Fh->getHeight(), cellStart.x - 2, cellStart.y - 1);
-		int bottomIndex = computeIndex(Fh->getWidth(), Fh->getHeight(), cellStart.x - 1, cellStart.y - 2);
+		//we can't subdivide anymore, already at finest grid level; don't forget offset
+		int currentIndexH = computeIndex(hExt, cellStart + offset);
+		int currentIndex = computeIndex(sizeX + 1, sizeY + 1, cellStart.x + offset.x, cellStart.y + offset.y);
+		int leftIndex = computeIndex(sizeX + 1, sizeY + 1, cellStart.x + offset.x - 1, cellStart.y + offset.y);
+		int bottomIndex = computeIndex(sizeX + 1, sizeY + 1, cellStart.x + offset.x, cellStart.y + offset.y - 1);
 
-		h->getValues()[currentIndexH] -= dt * ((Fh->getValues()[currentIndex] - Fh->getValues()[leftIndex]) * dxi + (Gh->getValues()[currentIndex] - Gh->getValues()[bottomIndex]) * dyi);
-		hu->getValues()[currentIndexH] -= dt * ((Fhu->getValues()[currentIndex] - Fhu->getValues()[leftIndex]) * dxi + (Ghu->getValues()[currentIndex] - Ghu->getValues()[bottomIndex]) * dyi + Bu->getValues()[currentIndex] * dxi);
-		hv->getValues()[currentIndexH] -= dt * ((Fhv->getValues()[currentIndex] - Fhv->getValues()[leftIndex]) * dxi + (Ghv->getValues()[currentIndex] - Ghv->getValues()[bottomIndex]) * dyi + Bv->getValues()[currentIndex] * dyi);
+		//if (cellStart.x == 0 && cellStart.y == 0)
+		//{
+		//	printf("h[curr]:%f\n", h[currentIndex]);
+		//}
+
+		h[currentIndexH] -= dt * ((Fh[currentIndex] - Fh[leftIndex]) * dxi + (Gh[currentIndex] - Gh[bottomIndex]) * dyi);
+		hu[currentIndexH] -= dt * ((Fhu[currentIndex] - Fhu[leftIndex]) * dxi + (Ghu[currentIndex] - Ghu[bottomIndex]) * dyi + Bu[currentIndexH] * dxi);
+		hv[currentIndexH] -= dt * ((Fhv[currentIndex] - Fhv[leftIndex]) * dxi + (Ghv[currentIndex] - Ghv[bottomIndex]) * dyi + Bv[currentIndexH] * dyi);
 	}
 	else
 	{
-		int d = h->getDepths()[computeIndex(hExt, cellStart)];
+		int d = tree[computeIndex(hExt, cellStart + offset)];
 		if (d == depth)
 		{
 			//we don't need to subdivide, we are already at desired accuracy
@@ -303,6 +304,8 @@ __global__ void eulerTimestep_child_kernel(TreeArray* h, TreeArray* hu, TreeArra
 				Fh, Fhu, Fhv,
 				Gh, Ghu, Ghv,
 				Bu, Bv,
+				tree,
+				sizeX, sizeY,
 				dt, dxi, dyi,
 				refinementBaseX, refinementBaseY, maxRecursions,
 				depth + 1, cellStart, cellExt);
@@ -311,10 +314,12 @@ __global__ void eulerTimestep_child_kernel(TreeArray* h, TreeArray* hu, TreeArra
 
 }
 
-__global__ void eulerTimestep_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv,
-	TreeArray* Fh, TreeArray* Fhu, TreeArray* Fhv,
-	TreeArray* Gh, TreeArray* Ghu, TreeArray* Ghv,
-	TreeArray* Bu, TreeArray* Bv,
+__global__ void eulerTimestep_kernel(float* h, float* hu, float* hv,
+	float* Fh, float* Fhu, float* Fhv,
+	float* Gh, float* Ghu, float* Ghv,
+	float* Bu, float* Bv,
+	int* tree,
+	int sizeX, int sizeY,
 	float dt, float dxi, float dyi,
 	int refinementBaseX, int refinementBaseY, int maxRecursions)
 {
@@ -322,8 +327,8 @@ __global__ void eulerTimestep_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv,
 	int cellY = threadIdx.y + blockIdx.y * blockDim.y;
 	uint2 offset = make_uint2(1, 1);
 
-	uint2 hExt = make_uint2(h->getWidth(), h->getHeight());
-	uint2 computeExt = hExt - make_uint2(2, 2);
+	uint2 hExt = make_uint2(sizeX + 2, sizeY + 2);
+	uint2 computeExt = make_uint2(sizeX, sizeY);
 	uint2 cellStart;
 	uint2 cellExt;
 	computeCellRectangle(computeExt, refinementBaseX, refinementBaseY, maxRecursions, cellX, cellY, cellStart, cellExt);
@@ -332,7 +337,7 @@ __global__ void eulerTimestep_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv,
 	if (cellStart.x >= computeExt.x || cellStart.y >= computeExt.y)
 		return;
 
-	int d = h->getDepths()[computeIndex(hExt, cellStart + offset)];
+	int d = tree[computeIndex(hExt, cellStart + offset)];
 	if (d == 0)
 	{
 		//we don't need to subdivide
@@ -346,19 +351,22 @@ __global__ void eulerTimestep_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv,
 			Fh, Fhu, Fhv,
 			Gh, Ghu, Ghv,
 			Bu, Bv,
+			tree,
+			sizeX, sizeY,
 			dt, dxi, dyi,
 			refinementBaseX, refinementBaseY, maxRecursions,
-			1, cellStart + offset, cellExt);
+			1, cellStart, cellExt);
 	}
 }
 
 //--------------------------------
 //euler timestep
-__global__ void getMax_child_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv, float2* subOutput, int refinementBaseX, int refinementBaseY, int depth, int maxRecursions, uint2 cellStart, uint2 cellExt)
+__global__ void getMax_child_kernel(float* h, float* hu, float* hv, int* tree, int sizeX, int sizeY, float2* subOutput, int refinementBaseX, int refinementBaseY, int depth, int maxRecursions, uint2 cellStart, uint2 cellExt)
 {
 	int i = threadIdx.x + blockIdx.x * blockDim.x;
 	int j = threadIdx.y + blockIdx.y * blockDim.y;
 
+	uint2 offset = make_uint2(1, 1);
 	uint2 ccellStart;
 	uint2 ccellExt;
 	computeCellRectangle(cellExt, refinementBaseX, refinementBaseY, maxRecursions - depth, i, j, ccellStart, ccellExt);
@@ -371,13 +379,13 @@ __global__ void getMax_child_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv, 
 	//modify to real cell area
 	cellExt = ccellExt;
 
-	int currentIndex = computeIndex(h->getWidth(), h->getHeight(), cellStart.x, cellStart.y);
-	int d = h->getDepths()[currentIndex];
+	int currentIndex = computeIndex(sizeX + 2, sizeY + 2, cellStart.x + offset.x, cellStart.y + offset.y);
+	int d = tree[currentIndex];
 	if (depth == maxRecursions || d == depth)
 	{
 		//we can't subdivide anymore
 		//or we don't need to subdivide anymore
-		float2 maxima = make_float2(h->getValues()[currentIndex], max(fabsf(hu->getValues()[currentIndex]), fabsf(hv->getValues()[currentIndex])));
+		float2 maxima = make_float2(h[currentIndex], max(fabsf(hu[currentIndex]), fabsf(hv[currentIndex])));
 		subOutput[computeIndex(refinementBaseX, refinementBaseY, i, j)] = maxima;
 	}
 	else
@@ -386,7 +394,7 @@ __global__ void getMax_child_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv, 
 		float2* subSubOutput = new float2[refinementBaseX * refinementBaseY];
 		dim3 block(refinementBaseX, refinementBaseY);
 		dim3 grid(1, 1);
-		getMax_child_kernel << <grid, block >> >(h, hu, hv, subSubOutput, refinementBaseX, refinementBaseY, depth + 1, maxRecursions, cellStart, cellExt);
+		getMax_child_kernel << <grid, block >> >(h, hu, hv, tree, sizeX, sizeY, subSubOutput, refinementBaseX, refinementBaseY, depth + 1, maxRecursions, cellStart, cellExt);
 		cudaDeviceSynchronize();
 
 		//get the maximum subOutput
@@ -402,7 +410,7 @@ __global__ void getMax_child_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv, 
 	}
 }
 
-__global__ void getMax_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv, float2* output, int sizeX, int sizeY, int refinementBaseX, int refinementBaseY, int maxRecursions)
+__global__ void getMax_kernel(float* h, float* hu, float* hv, int* tree, int sizeX, int sizeY, float2* output, int refinementBaseX, int refinementBaseY, int maxRecursions)
 {
 	int i = threadIdx.x + blockIdx.x * blockDim.x;
 	int j = threadIdx.y + blockIdx.y * blockDim.y;
@@ -410,19 +418,19 @@ __global__ void getMax_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv, float2
 	if (i >= sizeX || j >= sizeY)
 		return;
 
-	uint2 hExt = make_uint2(h->getWidth(), h->getHeight());
+	//offset to compute area
+	uint2 offset = make_uint2(1, 1);
+	uint2 hExt = make_uint2(sizeX + 2, sizeY + 2);
 	uint2 hCompute = hExt - make_uint2(2, 2);
 	uint2 cellStart;
 	uint2 cellExt;
 	computeCellRectangle(hCompute, refinementBaseX, refinementBaseY, maxRecursions, i, j, cellStart, cellExt);
-	//offset to compute area
-	cellStart += make_uint2(1, 1);
 
-	int currentIndex = computeIndex(hExt, cellStart);
-	if (h->getDepths()[currentIndex] == 0)
+	int currentIndex = computeIndex(hExt, cellStart + offset);
+	if (tree[currentIndex] == 0)
 	{
 		//we don't need to subdivide, cell is averaged
-		float2 maxima = make_float2(h->getValues()[currentIndex], max(fabsf(hu->getValues()[currentIndex]), fabsf(hv->getValues()[currentIndex])));
+		float2 maxima = make_float2(h[currentIndex], max(fabsf(hu[currentIndex]), fabsf(hv[currentIndex])));
 		output[computeIndex(sizeX, sizeY, i, j)] = maxima;
 	}
 	else
@@ -430,7 +438,7 @@ __global__ void getMax_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv, float2
 		float2* subOutput = new float2[refinementBaseX * refinementBaseY];
 		dim3 block(refinementBaseX, refinementBaseY);
 		dim3 grid(1, 1);
-		getMax_child_kernel << <grid, block >> >(h, hu, hv, subOutput, refinementBaseX, refinementBaseY, 1, maxRecursions, cellStart, cellExt);
+		getMax_child_kernel << <grid, block >> >(h, hu, hv, tree, sizeX, sizeY, subOutput, refinementBaseX, refinementBaseY, 1, maxRecursions, cellStart, cellExt);
 		cudaDeviceSynchronize();
 
 		//get the maximum subOutput
@@ -448,14 +456,14 @@ __global__ void getMax_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv, float2
 
 //--------------------------------
 //averaging of values
-//__global__ void getAveragedVerticalValue_child_kernel(TreeArray* arr, uint2 globStart, int refinementBase, int myDepth, int maxRecursions, float* resFather, int* numFather)
+//__global__ void getAveragedVerticalValue_child_kernel(float* arr, uint2 globStart, int refinementBase, int myDepth, int maxRecursions, float* resFather, int* numFather)
 //{
 //	int idxY = threadIdx.x + blockIdx.x * blockDim.x;
 //	int baseLengthY = (int)pow(refinementBase, maxRecursions - myDepth);
 //}
 //
 ////averaging part of a row / column
-//__device__ float getAveragedVerticalValue(TreeArray* arr, uint2 start, int refinementBase, int myDepth, int maxRecursions)
+//__device__ float getAveragedVerticalValue(float* arr, uint2 start, int refinementBase, int myDepth, int maxRecursions)
 //{
 //	//check depth of start, if refinement is needed
 //	if (arr->getDepths()[computeIndex(arr->getWidth(), arr->getHeight(), start.x, start.y)] == myDepth)
@@ -491,7 +499,7 @@ __global__ void getMax_kernel(TreeArray* h, TreeArray* hu, TreeArray* hv, float2
 //	}
 //}
 //
-//__device__ float getAveragedHorizontalValue(TreeArray* arr, uint2 start, int refinementBase, int myDepth)
+//__device__ float getAveragedHorizontalValue(float* arr, uint2 start, int refinementBase, int myDepth)
 //{
 //
 //}

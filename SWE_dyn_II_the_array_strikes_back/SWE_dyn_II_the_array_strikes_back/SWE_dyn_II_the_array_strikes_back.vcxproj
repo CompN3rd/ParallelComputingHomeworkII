@@ -21,7 +21,6 @@
   <ItemGroup>
     <ClInclude Include="Kernels.h" />
     <ClInclude Include="SWE_handler.h" />
-    <ClInclude Include="ArrayHelper.h" />
     <ClInclude Include="Utility.h" />
   </ItemGroup>
   <ItemGroup>

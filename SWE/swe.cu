@@ -106,7 +106,7 @@ int main(int argc, char** argv) {
   splash.setBoundaryType(WALL,WALL,WALL,WALL); // walls at all boundaries
 
   // define "checkpoints" for visualisation:
-  int numbChckPts = 20;
+  int numbChckPts = 9;
 
   SWE_Block::initTimestep(0.005/sqrt(9.81*11));
 #endif

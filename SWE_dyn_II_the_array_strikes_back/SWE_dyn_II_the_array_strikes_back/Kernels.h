@@ -25,7 +25,7 @@ __global__ void eulerTimestep_kernel(float* h, float* hu, float* hv,
 	int refinementBaseX, int refinementBaseY, int maxRecursions);
 
 //maximum of solution vector
-__global__ void getMax_kernel(float* h, float* hu, float* hv, int* tree, float2* output, int sizeX, int sizeY, int refinementBaseX, int refinementBaseY, int maxRecursions);
+__global__ void getMax_kernel(float* h, float* hu, float* hv, int* tree, int sizeX, int sizeY, float2* output, int refinementBaseX, int refinementBaseY, int maxRecursions);
 
 //averaging of values
 //__device__ float getAveragedVerticalValue(TreeArray* arr, uint2 start, int refinementBase, int myDepth, int maxRecursions);
