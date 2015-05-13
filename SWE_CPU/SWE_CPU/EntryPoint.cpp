@@ -2,7 +2,7 @@
 
 float splash_height(float x, float y)
 {
-	//return 10 + (1 - (x + y));
+	//return 100 + (1 - (x + y));
 	return 2.0f - (1.0f / 512.0f) * (x + y);
 }
 

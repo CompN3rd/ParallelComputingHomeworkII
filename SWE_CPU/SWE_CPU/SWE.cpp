@@ -48,7 +48,7 @@ SWE::~SWE()
 
 void SWE::setInitialValues(float _h, float _u, float _v)
 {
-//#pragma omp parallel for
+#pragma omp parallel for
 	for (int i = 0; i < nx + 2; i++)
 	{
 		for (int j = 0; j < ny + 2; j++)
@@ -62,7 +62,7 @@ void SWE::setInitialValues(float _h, float _u, float _v)
 
 void SWE::setInitialValues(float(*_h)(float, float), float _u, float _v)
 {
-//#pragma omp parallel for
+#pragma omp parallel for
 	for (int i = 0; i < nx + 2; i++)
 	{
 		for (int j = 0; j < ny + 2; j++)
@@ -76,7 +76,7 @@ void SWE::setInitialValues(float(*_h)(float, float), float _u, float _v)
 
 void SWE::setBathymetry(float(*_b)(float, float))
 {
-//#pragma omp parallel for
+#pragma omp parallel for
 	for (int i = 0; i < nx + 2; i++)
 		for (int j = 0; j < nx + 2; j++)
 			b[li(nx + 2, i, j)] = _b((i - 0.5f) * dx, (j - 0.5f) * dy);
@@ -86,7 +86,7 @@ void SWE::setBathymetry(float(*_b)(float, float))
 
 void SWE::setBathymetry(float _b)
 {
-//#pragma omp parallel for
+#pragma omp parallel for
 	for (int i = 0; i < nx + 2; i++)
 		for (int j = 0; j < nx + 2; j++)
 			b[li(nx + 2, i, j)] = _b;
@@ -106,7 +106,7 @@ void SWE::setBoundaryLayer()
 {
 	if (left == CONNECT)
 	{
-//#pragma omp parallel for
+#pragma omp parallel for
 		for (int j = 0; j < ny + 2; j++)
 		{
 			h[li(nx + 2, 0, j)] = h[li(nx + 2, nx, j)];
@@ -116,7 +116,7 @@ void SWE::setBoundaryLayer()
 	}
 	else
 	{
-//#pragma omp parallel for
+#pragma omp parallel for
 		for (int j = 0; j < ny + 2; j++)
 		{
 			h[li(nx + 2, 0, j)] = h[li(nx + 2, 1, j)];
@@ -126,7 +126,7 @@ void SWE::setBoundaryLayer()
 	}
 	if (right == CONNECT)
 	{
-//#pragma omp parallel for
+#pragma omp parallel for
 		for (int j = 0; j < ny + 2; j++)
 		{
 			h[li(nx + 2, nx + 1, j)] = h[li(nx + 2, 1, j)];
@@ -136,7 +136,7 @@ void SWE::setBoundaryLayer()
 	}
 	else
 	{
-//#pragma omp parallel for
+#pragma omp parallel for
 		for (int j = 0; j < ny + 2; j++)
 		{
 			h[li(nx + 2, nx + 1, j)] = h[li(nx + 2, nx, j)];
@@ -146,7 +146,7 @@ void SWE::setBoundaryLayer()
 	}
 	if (bottom == CONNECT)
 	{
-//#pragma omp parallel for
+#pragma omp parallel for
 		for (int i = 0; i < nx + 2; i++)
 		{
 			h[li(nx + 2, i, 0)] = h[li(nx + 2, i, ny)];
@@ -156,7 +156,7 @@ void SWE::setBoundaryLayer()
 	}
 	else
 	{
-//#pragma omp parallel for
+#pragma omp parallel for
 		for (int i = 0; i < nx + 2; i++)
 		{
 			h[li(nx + 2, i, 0)] = h[li(nx + 2, i, 1)];
@@ -166,7 +166,7 @@ void SWE::setBoundaryLayer()
 	}
 	if (top == CONNECT)
 	{
-//#pragma omp parallel for
+#pragma omp parallel for
 		for (int i = 0; i < nx + 2; i++)
 		{
 			h[li(nx + 2, i, ny + 1)] = h[li(nx + 2, i, 1)];
@@ -176,7 +176,7 @@ void SWE::setBoundaryLayer()
 	}
 	else
 	{
-//#pragma omp parallel for
+#pragma omp parallel for
 		for (int i = 0; i < nx + 2; i++)
 		{
 			h[li(nx + 2, i, ny + 1)] = h[li(nx + 2, i, ny)];
@@ -196,13 +196,13 @@ float SWE::computeLocalSV(int i, int j, char dir)
 	float sv1, sv2;
 	if (dir == 'x')
 	{
-		sv1 = fabsf(hu[li(nx + 1, i, j)] / h[li(nx + 2, i, j)]) + sqrtf(g * h[li(nx + 2, i, j)]);
-		sv2 = fabsf(hu[li(nx + 1, i + 1, j)] / h[li(nx + 2, i + 1, j)]) + sqrtf(g * h[li(nx + 2, i + 1, j)]);
+		sv1 = fabsf(hu[li(nx + 2, i, j)] / h[li(nx + 2, i, j)]) + sqrtf(g * h[li(nx + 2, i, j)]);
+		sv2 = fabsf(hu[li(nx + 2, i + 1, j)] / h[li(nx + 2, i + 1, j)]) + sqrtf(g * h[li(nx + 2, i + 1, j)]);
 	}
 	else
 	{
-		sv1 = fabsf(hv[li(nx + 1, i, j)] / h[li(nx + 2, i, j)]) + sqrtf(g * h[li(nx + 2, i, j)]);
-		sv2 = fabsf(hv[li(nx + 1, i, j + 1)] / h[li(nx + 2, i, j + 1)]) + sqrtf(g * h[li(nx + 2, i, j + 1)]);
+		sv1 = fabsf(hv[li(nx + 2, i, j)] / h[li(nx + 2, i, j)]) + sqrtf(g * h[li(nx + 2, i, j)]);
+		sv2 = fabsf(hv[li(nx + 2, i, j + 1)] / h[li(nx + 2, i, j + 1)]) + sqrtf(g * h[li(nx + 2, i, j + 1)]);
 	}
 	return (sv1 > sv2) ? sv1 : sv2;
 }
@@ -210,35 +210,35 @@ float SWE::computeLocalSV(int i, int j, char dir)
 void SWE::computeFluxes()
 {
 	//fluxes in x direction:
-//#pragma omp parallel for
+#pragma omp parallel for
 	for (int i = 0; i <= nx; i++)
 	{
 		for (int j = 1; j <= ny; j++)
 		{
 			float llf = computeLocalSV(i, j, 'x');
-			Fh[li(nx + 1, i, j)] = computeFlux(h[li(nx + 2, i, j)] * hu[li(nx + 1, i, j)], h[li(nx + 2, i + 1, j)] * hu[li(nx + 1, i + 1, j)], h[li(nx + 2, i, j)], h[li(nx + 2, i + 1, j)], llf);
-			Fhu[li(nx + 1, i, j)] = computeFlux(hu[li(nx + 1, i, j)] * hu[li(nx + 1, i, j)] + 0.5f * g * h[li(nx + 2, i, j)],
-				hu[li(nx + 1, i + 1, j)] * hu[li(nx + 1, i + 1, j)] + 0.5f * g * h[li(nx + 2, i + 1, j)],
-				hu[li(nx + 1, i, j)],
-				hu[li(nx + 1, i + 1, j)],
+			Fh[li(nx + 1, i, j)] = computeFlux(h[li(nx + 2, i, j)] * hu[li(nx + 2, i, j)], h[li(nx + 2, i + 1, j)] * hu[li(nx + 2, i + 1, j)], h[li(nx + 2, i, j)], h[li(nx + 2, i + 1, j)], llf);
+			Fhu[li(nx + 1, i, j)] = computeFlux(hu[li(nx + 2, i, j)] * hu[li(nx + 2, i, j)] + 0.5f * g * h[li(nx + 2, i, j)],
+				hu[li(nx + 2, i + 1, j)] * hu[li(nx + 2, i + 1, j)] + 0.5f * g * h[li(nx + 2, i + 1, j)],
+				hu[li(nx + 2, i, j)],
+				hu[li(nx + 2, i + 1, j)],
 				llf);
-			Fhv[li(nx + 1, i, j)] = computeFlux(hu[li(nx + 1, i, j)] * hv[li(nx + 1, i, j)], hu[li(nx + 1, i + 1, j)] * hv[li(nx + 1, i + 1, j)], hv[li(nx + 1, i, j)], hv[li(nx + 1, i + 1, j)], llf);
+			Fhv[li(nx + 1, i, j)] = computeFlux(hu[li(nx + 2, i, j)] * hv[li(nx + 2, i, j)], hu[li(nx + 2, i + 1, j)] * hv[li(nx + 2, i + 1, j)], hv[li(nx + 2, i, j)], hv[li(nx + 2, i + 1, j)], llf);
 		}
 	}
 
 	//fluxes in y direction
-//#pragma omp parallel for
+#pragma omp parallel for
 	for (int j = 0; j <= ny; j++)
 	{
 		for (int i = 1; i <= nx; i++)
 		{
 			float llf = computeLocalSV(i, j, 'y');
-			Gh[li(nx + 1, i, j)] = computeFlux(h[li(nx + 2, i, j)] * hv[li(nx + 2, i, j)], h[li(nx + 1, i, j + 1)] * hv[li(nx + 1, i, j + 1)], h[li(nx + 2, i, j)], h[li(nx + 2, i, j + 1)], llf);
-			Ghu[li(nx + 1, i, j)] = computeFlux(hu[li(nx + 1, i, j)] * hv[li(nx + 1, i, j)], hu[li(nx + 1, i, j + 1)] * hv[li(nx + 1, i, j + 1)], hu[li(nx + 1, i, j)], hu[li(nx + 1, i, j + 1)], llf);
-			Ghv[li(nx + 1, i, j)] = computeFlux(hv[li(nx + 1, i, j)] * hv[li(nx + 1, i, j)] + 0.5f*g*h[li(nx + 2, i, j)],
-				hv[li(nx + 1, i, j + 1)] * hv[li(nx + 1, i, j + 1)] + 0.5f*g*h[li(nx + 2, i, j + 1)],
-				hv[li(nx + 1, i, j)],
-				hv[li(nx + 1, i, j + 1)],
+			Gh[li(nx + 1, i, j)] = computeFlux(h[li(nx + 2, i, j)] * hv[li(nx + 2, i, j)], h[li(nx + 2, i, j + 1)] * hv[li(nx + 2, i, j + 1)], h[li(nx + 2, i, j)], h[li(nx + 2, i, j + 1)], llf);
+			Ghu[li(nx + 1, i, j)] = computeFlux(hu[li(nx + 2, i, j)] * hv[li(nx + 2, i, j)], hu[li(nx + 2, i, j + 1)] * hv[li(nx + 2, i, j + 1)], hu[li(nx + 2, i, j)], hu[li(nx + 2, i, j + 1)], llf);
+			Ghv[li(nx + 1, i, j)] = computeFlux(hv[li(nx + 2, i, j)] * hv[li(nx + 2, i, j)] + 0.5f*g*h[li(nx + 2, i, j)],
+				hv[li(nx + 2, i, j + 1)] * hv[li(nx + 2, i, j + 1)] + 0.5f*g*h[li(nx + 2, i, j + 1)],
+				hv[li(nx + 2, i, j)],
+				hv[li(nx + 2, i, j + 1)],
 				llf);
 		}
 	}
@@ -247,13 +247,13 @@ void SWE::computeFluxes()
 
 void SWE::computeBathymetrySources()
 {
-//#pragma omp parallel for
+#pragma omp parallel for
 	for (int i = 1; i <= nx; i++)
 	{
 		for (int j = 1; j <= ny; j++)
 		{
 			Bu[li(nx + 2, i, j)] = g*(h[li(nx + 2, i, j)] * b[li(nx + 2, i, j)] - h[li(nx + 2, i - 1, j)] * b[li(nx + 2, i - 1, j)]);
-			Bv[li(nx + 2, i, j)] = g*(h[li(nx + 1, i, j)] * b[li(nx + 2, i, j)] - h[li(nx + 2, i, j - 1)] * b[li(nx + 2, i, j - 1)]);
+			Bv[li(nx + 2, i, j)] = g*(h[li(nx + 2, i, j)] * b[li(nx + 2, i, j)] - h[li(nx + 2, i, j - 1)] * b[li(nx + 2, i, j - 1)]);
 		}
 	}
 
@@ -262,11 +262,10 @@ void SWE::computeBathymetrySources()
 float SWE::eulerTimestep()
 {
 	float pes = 0.5f;
-	//float pes = 1.0f;
 
 	computeFluxes();
 
-//#pragma omp parallel for
+#pragma omp parallel for
 	for (int i = 1; i <= nx; i++)
 	{
 		for (int j = 1; j <= ny; j++)
@@ -283,8 +282,8 @@ float SWE::eulerTimestep()
 
 float SWE::getMaxTimestep()
 {
-	float hmax = 0.0f;
-	float vmax = 0.0f;
+	float hmax = numeric_limits<float>::min();
+	float vmax = numeric_limits<float>::min();
 	float meshSize = (dx < dy) ? dx : dy;
 
 	for (int i = 1; i <= nx; i++)
@@ -292,8 +291,8 @@ float SWE::getMaxTimestep()
 		for (int j = 1; j <= ny; j++)
 		{
 			if (h[li(nx + 2, i, j)] > hmax) hmax = h[li(nx + 2, i, j)];
-			if (fabsf(hu[li(nx + 2, i, j)]) > vmax) vmax = hu[li(nx + 2, i, j)];
-			if (fabsf(hv[li(nx + 2, i, j)]) > vmax)vmax = hv[li(nx + 2, i, j)];
+			if (fabsf(hu[li(nx + 2, i, j)]) > vmax) vmax = fabsf(hu[li(nx + 2, i, j)]);
+			if (fabsf(hv[li(nx + 2, i, j)]) > vmax) vmax = fabsf(hv[li(nx + 2, i, j)]);
 		}
 	}
 
@@ -350,12 +349,12 @@ void SWE::writeVTKFile(string FileName)
 	Vtk_file << "LOOKUP_TABLE default" << endl;
 	for (int j = 1; j < ny + 1; j++)
 		for (int i = 1; i < nx + 1; i++)
-			Vtk_file << hu[li(nx + 1, i, j)] / h[li(nx + 2, i, j)] << endl;
+			Vtk_file << hu[li(nx + 2, i, j)] / h[li(nx + 2, i, j)] << endl;
 	Vtk_file << "SCALARS V float 1" << endl;
 	Vtk_file << "LOOKUP_TABLE default" << endl;
 	for (int j = 1; j < ny + 1; j++)
 		for (int i = 1; i < nx + 1; i++)
-			Vtk_file << hv[li(nx + 1, i, j)] / h[li(nx + 2, i, j)] << endl;
+			Vtk_file << hv[li(nx + 2, i, j)] / h[li(nx + 2, i, j)] << endl;
 	Vtk_file << "SCALARS B float 1" << endl;
 	Vtk_file << "LOOKUP_TABLE default" << endl;
 	for (int j = 1; j < ny + 1; j++)
