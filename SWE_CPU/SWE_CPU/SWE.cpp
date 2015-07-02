@@ -213,7 +213,7 @@ void SWE::computeFluxes()
 #pragma omp parallel for
 	for (int i = 0; i <= nx; i++)
 	{
-		for (int j = 1; j <= ny; j++)
+		for (int j = 0; j <= ny; j++)
 		{
 			float llf = computeLocalSV(i, j, 'x');
 			Fh[li(nx + 1, i, j)] = computeFlux(h[li(nx + 2, i, j)] * hu[li(nx + 2, i, j)], h[li(nx + 2, i + 1, j)] * hu[li(nx + 2, i + 1, j)], h[li(nx + 2, i, j)], h[li(nx + 2, i + 1, j)], llf);
@@ -230,13 +230,13 @@ void SWE::computeFluxes()
 #pragma omp parallel for
 	for (int j = 0; j <= ny; j++)
 	{
-		for (int i = 1; i <= nx; i++)
+		for (int i = 0; i <= nx; i++)
 		{
 			float llf = computeLocalSV(i, j, 'y');
 			Gh[li(nx + 1, i, j)] = computeFlux(h[li(nx + 2, i, j)] * hv[li(nx + 2, i, j)], h[li(nx + 2, i, j + 1)] * hv[li(nx + 2, i, j + 1)], h[li(nx + 2, i, j)], h[li(nx + 2, i, j + 1)], llf);
 			Ghu[li(nx + 1, i, j)] = computeFlux(hu[li(nx + 2, i, j)] * hv[li(nx + 2, i, j)], hu[li(nx + 2, i, j + 1)] * hv[li(nx + 2, i, j + 1)], hu[li(nx + 2, i, j)], hu[li(nx + 2, i, j + 1)], llf);
-			Ghv[li(nx + 1, i, j)] = computeFlux(hv[li(nx + 2, i, j)] * hv[li(nx + 2, i, j)] + 0.5f*g*h[li(nx + 2, i, j)],
-				hv[li(nx + 2, i, j + 1)] * hv[li(nx + 2, i, j + 1)] + 0.5f*g*h[li(nx + 2, i, j + 1)],
+			Ghv[li(nx + 1, i, j)] = computeFlux(hv[li(nx + 2, i, j)] * hv[li(nx + 2, i, j)] + 0.5f * g * h[li(nx + 2, i, j)],
+				hv[li(nx + 2, i, j + 1)] * hv[li(nx + 2, i, j + 1)] + 0.5f * g * h[li(nx + 2, i, j + 1)],
 				hv[li(nx + 2, i, j)],
 				hv[li(nx + 2, i, j + 1)],
 				llf);
@@ -261,8 +261,6 @@ void SWE::computeBathymetrySources()
 
 float SWE::eulerTimestep()
 {
-	float pes = 0.5f;
-
 	computeFluxes();
 
 #pragma omp parallel for
@@ -270,17 +268,17 @@ float SWE::eulerTimestep()
 	{
 		for (int j = 1; j <= ny; j++)
 		{
-			h[li(nx + 2, i, j)] -= pes*dt*((Fh[li(nx + 1, i, j)] - Fh[li(nx + 1, i - 1, j)]) / dx + (Gh[li(nx + 1, i, j)] - Gh[li(nx + 1, i, j - 1)]) / dy);
-			hu[li(nx + 2, i, j)] -= pes*dt*((Fhu[li(nx + 1, i, j)] - Fhu[li(nx + 1, i - 1, j)]) / dx + (Ghu[li(nx + 1, i, j)] - Ghu[li(nx + 1, i, j - 1)]) / dy + Bu[li(nx + 2, i, j)] / dx);
-			hv[li(nx + 2, i, j)] -= pes*dt*((Fhv[li(nx + 1, i, j)] - Fhv[li(nx + 1, i - 1, j)]) / dx + (Ghv[li(nx + 1, i, j)] - Ghv[li(nx + 1, i, j - 1)]) / dy + Bv[li(nx + 2, i, j)] / dy);
+			h[li(nx + 2, i, j)] -= dt*((Fh[li(nx + 1, i, j)] - Fh[li(nx + 1, i - 1, j)]) / dx + (Gh[li(nx + 1, i, j)] - Gh[li(nx + 1, i, j - 1)]) / dy);
+			hu[li(nx + 2, i, j)] -= dt*((Fhu[li(nx + 1, i, j)] - Fhu[li(nx + 1, i - 1, j)]) / dx + (Ghu[li(nx + 1, i, j)] - Ghu[li(nx + 1, i, j - 1)]) / dy + Bu[li(nx + 2, i, j)] / dx);
+			hv[li(nx + 2, i, j)] -= dt*((Fhv[li(nx + 1, i, j)] - Fhv[li(nx + 1, i - 1, j)]) / dx + (Ghv[li(nx + 1, i, j)] - Ghv[li(nx + 1, i, j - 1)]) / dy + Bv[li(nx + 2, i, j)] / dy);
 		}
 	}
 
-	return pes * dt;
+	return dt;
 }
 
 
-float SWE::getMaxTimestep()
+float SWE::getMaxTimestep(float cfl_number)
 {
 	float hmax = numeric_limits<float>::min();
 	float vmax = numeric_limits<float>::min();
@@ -300,20 +298,25 @@ float SWE::getMaxTimestep()
 	cout << "vmax " << vmax << endl << flush;
 	//cout << "dt " << meshSize / (sqrt(g*hmax) + vmax) << endl;
 
-	return meshSize / (sqrtf(g*hmax) + vmax);
+	return cfl_number * meshSize / (sqrtf(g*hmax) + vmax);
 }
 
 
 float SWE::simulate(float tStart, float tEnd)
 {
+	static int iter = 0;
+
 	float t = tStart;
 	do
 	{
+		//do debug output
+		writeVTKFile(generateFileName("detailed_out/out", iter));
 		setBoundaryLayer();
 		computeBathymetrySources();
 		t += eulerTimestep();
-		float tMax = getMaxTimestep();
-		setTimestep(tMax);
+		//float tMax = getMaxTimestep();
+		//setTimestep(tMax);
+		iter++;
 	} while (t < tEnd);
 
 	return t;
